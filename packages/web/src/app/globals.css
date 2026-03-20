@@ -1,0 +1,65 @@
+@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: oklch(0.35 0 0); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.45 0 0); }
+
+@layer base {
+  :root {
+    --background: oklch(0.118 0.006 285);
+    --foreground: oklch(0.97 0.002 285);
+    --card: oklch(0.155 0.006 285);
+    --card-foreground: oklch(0.97 0.002 285);
+    --popover: oklch(0.155 0.006 285);
+    --popover-foreground: oklch(0.97 0.002 285);
+    --primary: oklch(0.65 0.22 292);
+    --primary-foreground: oklch(0.98 0.002 285);
+    --secondary: oklch(0.2 0.006 285);
+    --secondary-foreground: oklch(0.97 0.002 285);
+    --muted: oklch(0.2 0.006 285);
+    --muted-foreground: oklch(0.58 0.01 285);
+    --accent: oklch(0.22 0.015 292);
+    --accent-foreground: oklch(0.97 0.002 285);
+    --destructive: oklch(0.62 0.22 25);
+    --destructive-foreground: oklch(0.98 0.002 285);
+    --border: oklch(1 0 0 / 8%);
+    --input: oklch(1 0 0 / 10%);
+    --ring: oklch(0.65 0.22 292);
+    --radius: 0.75rem;
+  }
+
+  * {
+    border-color: rgb(255 255 255 / 8%);
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: oklch(0.118 0.006 285);
+    color: oklch(0.97 0.002 285);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .gradient-border {
+    background:
+      linear-gradient(oklch(0.118 0.006 285), oklch(0.118 0.006 285)) padding-box,
+      linear-gradient(135deg, oklch(0.65 0.22 292 / 60%), oklch(0.7 0.15 220 / 40%)) border-box;
+    border: 1px solid transparent;
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 24px oklch(0.65 0.22 292 / 20%), 0 0 8px oklch(0.65 0.22 292 / 10%);
+  }
+
+  .glass {
+    background: oklch(1 0 0 / 4%);
+    backdrop-filter: blur(12px);
+    border: 1px solid oklch(1 0 0 / 8%);
+  }
+}

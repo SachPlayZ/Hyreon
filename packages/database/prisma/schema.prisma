@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  GOOGLE
+  METAMASK
+}
+
+enum AgentType {
+  DISPATCHER
+  WORKER
+}
+
+enum TaskStatus {
+  PENDING
+  CLASSIFYING
+  QUOTING
+  AWAITING_CONFIRMATION
+  HIRING
+  ESCROW_CREATED
+  IN_PROGRESS
+  GATHERING_INPUTS
+  RATING_WINDOW
+  COMPLETED
+  ESCROW_RELEASED
+  FAILED
+  REFUNDED
+}
+
+enum TaskType {
+  SUMMARIZATION
+  CONTENT_GENERATION
+}
+
+enum TransactionType {
+  ESCROW_CREATE
+  ESCROW_RELEASE
+  RECEIPT
+  REFUND
+  USER_DEPOSIT
+  PLATFORM_FEE
+}
+
+enum MessageRole {
+  USER
+  DISPATCHER
+  SYSTEM
+}
+
+model User {
+  id                  String       @id @default(uuid())
+  name                String
+  hederaAccountId     String       @unique @map("hedera_account_id")
+  authProvider        AuthProvider @default(METAMASK) @map("auth_provider")
+  googleId            String?      @unique @map("google_id")
+  evmAddress          String?      @unique @map("evm_address")
+  encryptedPrivateKey String?      @map("encrypted_private_key")
+  hbarBalance         Float        @default(0) @map("hbar_balance")
+  hbarDeposited       Float        @default(0) @map("hbar_deposited")
+  hbarSpent           Float        @default(0) @map("hbar_spent")
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  tasks            Task[]
+  userTransactions UserTransaction[]
+  ownedAgents      Agent[]           @relation("OwnedAgents")
+
+  @@map("users")
+}
+
+model UserTransaction {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // "deposit" | "withdraw"
+  amountHbar  Float    @map("amount_hbar")
+  hederaTxId  String?  @map("hedera_tx_id")
+  memo        String?
+  status      String   @default("pending") // pending | confirmed | failed
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("user_transactions")
+}
+
+model Agent {
+  id               String    @id @default(uuid())
+  name             String
+  type             AgentType
+  capability       String?
+  accountId        String?   @map("account_id")
+  inboundTopicId   String?   @map("inbound_topic_id")
+  outboundTopicId  String?   @map("outbound_topic_id")
+  profileTopicId   String?   @map("profile_topic_id")
+  status           String    @default("active")
+  rateHbar         Float     @default(1.0) @map("rate_hbar")
+  tasksCompleted   Int       @default(0) @map("tasks_completed")
+  taskName         String?   @map("task_name")
+  slaSeconds       Int       @default(120) @map("sla_seconds")
+  description         String?
+  apiUrl              String?   @map("api_url")
+  exampleRequestBody  Json?     @map("example_request_body")
+  requestFieldsConfig Json?     @map("request_fields_config")
+  exampleResponseBody Json?     @map("example_response_body")
+  walletId         String?   @map("wallet_id")
+  version          String    @default("1.0")
+  isThirdParty     Boolean   @default(false) @map("is_third_party")
+  ownerId          String?   @map("owner_id")
+  owner            User?     @relation("OwnedAgents", fields: [ownerId], references: [id])
+  reputationScore  Float     @default(0.5) @map("reputation_score")
+  ratingAvg        Float     @default(0) @map("rating_avg")
+  slaCompletionRate Float    @default(1.0) @map("sla_completion_rate")
+  totalRatings     Int       @default(0) @map("total_ratings")
+  disputeRate      Float     @default(0) @map("dispute_rate")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  assignedTasks    Task[]    @relation("AssignedWorker")
+  ratings          Rating[]
+
+  @@map("agents")
+}
+
+model Task {
+  id                    String      @id @default(uuid())
+  userMessage           String      @map("user_message")
+  classifiedType        TaskType?   @map("classified_type")
+  status                TaskStatus  @default(PENDING)
+  userId                String?     @map("user_id")
+  user                  User?       @relation(fields: [userId], references: [id])
+  assignedWorkerId      String?     @map("assigned_worker_id")
+  assignedWorker        Agent?      @relation("AssignedWorker", fields: [assignedWorkerId], references: [id])
+  escrowAmountHbar      Float?      @map("escrow_amount_hbar")
+  escrowTxId            String?     @map("escrow_tx_id")
+  releaseTxId           String?     @map("release_tx_id")
+  resultText            String?     @map("result_text")
+  resultHash            String?     @map("result_hash")
+  receiptTopicId        String?     @map("receipt_topic_id")
+  receiptSequenceNumber Int?        @map("receipt_sequence_number")
+  connectionTopicId     String?     @map("connection_topic_id")
+  slaDeadline           DateTime?   @map("sla_deadline")
+  slaMet                Boolean?    @map("sla_met")
+  platformFeeHbar       Float?      @map("platform_fee_hbar")
+  userRating            Int?        @map("user_rating")
+  userComment           String?     @map("user_comment")
+  ratingWindowClosesAt  DateTime?   @map("rating_window_closes_at")
+  quoteData             Json?       @map("quote_data")
+  requestBody           Json?       @map("request_body")
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
+
+  transactions          Transaction[]
+  chatMessages          ChatMessage[]
+  ratings               Rating[]
+
+  @@index([status])
+  @@index([assignedWorkerId])
+  @@index([userId])
+  @@map("tasks")
+}
+
+model Rating {
+  id                String   @id @default(uuid())
+  taskId            String   @map("task_id")
+  task              Task     @relation(fields: [taskId], references: [id])
+  agentId           String   @map("agent_id")
+  agent             Agent    @relation(fields: [agentId], references: [id])
+  stars             Int
+  comment           String?
+  loggedOnChainTxId String?  @map("logged_on_chain_tx_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@index([taskId])
+  @@index([agentId])
+  @@map("ratings")
+}
+
+model Transaction {
+  id             String          @id @default(uuid())
+  taskId         String          @map("task_id")
+  task           Task            @relation(fields: [taskId], references: [id])
+  type           TransactionType
+  hederaTxId     String?         @map("hedera_tx_id")
+  topicId        String?         @map("topic_id")
+  sequenceNumber Int?            @map("sequence_number")
+  amountHbar     Float?          @map("amount_hbar")
+  fromAccount    String?         @map("from_account")
+  toAccount      String?         @map("to_account")
+  status         String          @default("pending")
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  @@index([taskId])
+  @@map("transactions")
+}
+
+model ChatMessage {
+  id        Int         @id @default(autoincrement())
+  taskId    String?     @map("task_id")
+  task      Task?       @relation(fields: [taskId], references: [id])
+  role      MessageRole
+  content   String
+  metadata  Json?
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@index([taskId])
+  @@map("chat_messages")
+}
+
+model Connection {
+  id                    String   @id @default(uuid())
+  dispatcherAccountId   String   @map("dispatcher_account_id")
+  workerAccountId       String   @map("worker_account_id")
+  connectionTopicId     String   @map("connection_topic_id")
+  status                String   @default("active")
+  lastMessageSequence   Int      @default(0) @map("last_message_sequence")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@unique([dispatcherAccountId, workerAccountId])
+  @@map("connections")
+}
