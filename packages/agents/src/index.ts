@@ -6,6 +6,7 @@ import { registerAgent, createHCS10Client } from './hcs10/setup';
 import { ensureConnectionBetween } from './hcs10/connections';
 import { SummarizerWorker } from './workers/summarizer';
 import { ContentGenWorker } from './workers/content-gen';
+import { encryptPrivateKey, decryptPrivateKey } from './hedera/keyEncryption';
 import { DispatcherAgent } from './dispatcher';
 import { createServer } from './api/server';
 import { startSlaMonitor } from './jobs/sla-monitor';
@@ -46,6 +47,7 @@ async function ensureAgentRegistered(
       type,
       capability,
       accountId: result.accountId,
+      encryptedPrivateKey: result.privateKey ? encryptPrivateKey(result.privateKey) : undefined,
       inboundTopicId: result.inboundTopicId,
       outboundTopicId: result.outboundTopicId,
       profileTopicId: result.profileTopicId,
@@ -158,12 +160,15 @@ async function main() {
     2.0
   );
 
-  // 5. Create HCS10 clients — use each agent's own account ID so getOperatorId()
-  // resolves their registered HCS-11 profile. All sign with the operator key
-  // since these accounts were created under the operator.
-  const dispatcherClient = createHCS10Client(dispatcherAgent.accountId ?? undefined);
-  const summarizerClient = createHCS10Client(summarizerAgent.accountId ?? undefined);
-  const contentGenClient = createHCS10Client(contentGenAgent.accountId ?? undefined);
+  // 5. Create HCS10 clients — use each agent's own account ID and private key
+  // so the SDK wraps messages with the correct operator_id (HCS-10 envelope).
+  function agentKey(agent: any): string | undefined {
+    if (agent.encryptedPrivateKey) return decryptPrivateKey(agent.encryptedPrivateKey);
+    return undefined; // fallback to platform operator key
+  }
+  const dispatcherClient = createHCS10Client(dispatcherAgent.accountId ?? undefined, agentKey(dispatcherAgent));
+  const summarizerClient = createHCS10Client(summarizerAgent.accountId ?? undefined, agentKey(summarizerAgent));
+  const contentGenClient = createHCS10Client(contentGenAgent.accountId ?? undefined, agentKey(contentGenAgent));
 
   // 6. Ensure connections
   if (dispatcherAgent.accountId && summarizerAgent.accountId) {

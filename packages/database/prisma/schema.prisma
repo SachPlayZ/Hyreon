@@ -124,6 +124,7 @@ model Agent {
   hcs10Verified       Boolean            @default(false) @map("hcs10_verified")
   apiKeyHash          String?            @map("api_key_hash")
   apiKeyPrefix        String?            @map("api_key_prefix")
+  encryptedPrivateKey String?            @map("encrypted_private_key")
   connectionStatus    String             @default("none") @map("connection_status")
   ownerId             String?            @map("owner_id")
   owner            User?     @relation("OwnedAgents", fields: [ownerId], references: [id])

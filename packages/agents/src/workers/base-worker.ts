@@ -2,6 +2,7 @@ import { HCS10Client } from '@hashgraphonline/standards-sdk';
 import { getPrismaClient } from '@repo/database';
 import { getNewMessages, sendMessageOnConnection } from '../hcs10/messaging';
 import { createHCS10Client } from '../hcs10/setup';
+import { decryptPrivateKey } from '../hedera/keyEncryption';
 
 const prisma = getPrismaClient();
 
@@ -15,9 +16,10 @@ export abstract class BaseWorker {
   private pollInterval: NodeJS.Timeout | null = null;
 
   async initialize(): Promise<void> {
-    // Use the worker's own account ID so HCS-10 resolves its registered HCS-11 profile
+    // Use the worker's own account ID + private key so HCS-10 messages have correct envelope
     const worker = await prisma.agent.findFirst({ where: { capability: this.capability, type: 'WORKER' } });
-    this.hcs10Client = createHCS10Client(worker?.accountId ?? undefined);
+    const workerKey = worker?.encryptedPrivateKey ? decryptPrivateKey(worker.encryptedPrivateKey) : undefined;
+    this.hcs10Client = createHCS10Client(worker?.accountId ?? undefined, workerKey);
     console.log(`[${this.name}] Worker initialized (account: ${worker?.accountId ?? 'operator'})`);
     this.startPolling();
   }

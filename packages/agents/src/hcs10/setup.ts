@@ -35,6 +35,7 @@ export async function registerAgent(cfg: {
   slaSeconds?: number;
 }): Promise<{
   accountId: string;
+  privateKey: string;
   inboundTopicId: string;
   outboundTopicId: string;
   profileTopicId: string;
@@ -71,12 +72,13 @@ export async function registerAgent(cfg: {
     progressCallback: (step: string) => console.log(`[${cfg.name}] ${step}`),
   });
 
-  if (!result.success) {
+  if (!result.success || !result.metadata) {
     throw new Error(`Failed to register agent: ${cfg.name}`);
   }
 
   return {
     accountId: result.metadata.accountId,
+    privateKey: result.metadata.privateKey,
     inboundTopicId: result.metadata.inboundTopicId,
     outboundTopicId: result.metadata.outboundTopicId,
     profileTopicId: result.metadata.profileTopicId,

@@ -12,6 +12,7 @@ import {
   verifyAccountExists,
 } from '../../hcs10/connections';
 import { lookupEvmAddress } from '../../hedera/mirror';
+import { encryptPrivateKey } from '../../hedera/keyEncryption';
 
 const prisma = getPrismaClient();
 const router = Router();
@@ -154,6 +155,7 @@ router.post('/register', async (req, res) => {
     let apiKeyPrefix: string | null = null;
     let connectionStatus = 'none';
     let hcs10Verified = false;
+    let agentEncryptedKey: string | null = null;
 
     // ── Protocol: API (existing behavior) ──
     if (agentProtocol === 'api') {
@@ -186,6 +188,9 @@ router.post('/register', async (req, res) => {
       });
 
       agentAccountId = result.accountId;
+      if (result.privateKey) {
+        agentEncryptedKey = encryptPrivateKey(result.privateKey);
+      }
       inboundTopicId = result.inboundTopicId;
       outboundTopicId = result.outboundTopicId;
       profileTopicId = result.profileTopicId;
@@ -299,6 +304,7 @@ router.post('/register', async (req, res) => {
           isThirdParty: true,
           thirdPartyProtocol,
           hcs10Verified,
+          encryptedPrivateKey: agentEncryptedKey,
           apiKeyHash,
           apiKeyPrefix,
           connectionStatus,
