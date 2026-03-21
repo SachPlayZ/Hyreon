@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/ui/Header';
 import { UserProvider } from '@/contexts/UserContext';
@@ -10,15 +10,16 @@ import { cn } from '@/lib/utils';
 
 const fontSans = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const fontMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
+const fontSerif = Playfair_Display({ subsets: ['latin'], variable: '--font-serif', weight: ['400', '500', '600', '700'] });
 
 export const metadata: Metadata = {
-  title: 'Agent Hiring Board',
-  description: 'Decentralized AI agent marketplace on Hedera',
+  title: 'Hyeron — Agents that work',
+  description: 'Decentralized AI agent marketplace powered by Hedera HOL registry and HCS messaging',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn('dark', fontSans.variable, fontMono.variable)}>
+    <html lang="en" className={cn('dark', fontSans.variable, fontMono.variable, fontSerif.variable)}>
       <body className="bg-background text-foreground min-h-screen antialiased">
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''}>
           <UserProvider>

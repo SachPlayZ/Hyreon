@@ -6,7 +6,7 @@ export async function initiateConnection(
 ): Promise<string> {
   const receipt = await client.submitConnectionRequest(
     workerInboundTopicId,
-    'Agent Hiring Board connection request'
+    'Hyeron connection request'
   );
   return receipt.transactionId.toString();
 }

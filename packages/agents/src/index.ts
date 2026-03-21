@@ -137,7 +137,7 @@ async function ensureTopics() {
 }
 
 async function main() {
-  console.log('[Boot] Agent Hiring Board starting...');
+  console.log('[Boot] Hyeron starting...');
 
   // 1. Connect to database
   await prisma.$connect();
@@ -222,7 +222,7 @@ async function main() {
   );
   const app = createServer(dispatcher);
   app.listen(config.api.port, () => {
-    console.log(`[Boot] Agent Hiring Board ready on port ${config.api.port}`);
+    console.log(`[Boot] Hyeron ready on port ${config.api.port}`);
     console.log(`[Boot] Health: http://localhost:${config.api.port}/api/health`);
   });
 

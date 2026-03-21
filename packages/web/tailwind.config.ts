@@ -39,10 +39,13 @@ const config: Config = {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
-        hedera: {
-          purple: '#8259EF',
-          dark: '#1E1B2E',
-          gray: '#252336',
+        hyeron: {
+          purple: '#A855F7',
+          'purple-light': '#C084FC',
+          'purple-dark': '#7C3AED',
+          dark: '#0A0A10',
+          card: '#12121C',
+          surface: '#16162A',
         },
       },
       borderRadius: {
@@ -52,6 +55,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       animation: {

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Wallet, Plus, LogOut, Zap, ExternalLink, User } from 'lucide-react';
+import { Wallet, Plus, LogOut, ExternalLink, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -19,15 +19,20 @@ export function Header() {
   const { user, logout } = useUser();
   const pathname = usePathname();
 
+  // Hide header on landing page
+  if (pathname === '/') return null;
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="size-8 rounded-xl bg-primary flex items-center justify-center glow-purple transition-transform group-hover:scale-105">
-            <Zap size={16} className="text-primary-foreground fill-current" />
+          <div className="size-8 rounded-lg bg-hyeron-purple/10 border border-hyeron-purple/20 flex items-center justify-center transition-all group-hover:bg-hyeron-purple/15 group-hover:border-hyeron-purple/30">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-hyeron-purple">
+              <path d="M6 7v10M18 7v10M6 12h12M6 9h12M6 15h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
           </div>
-          <span className="font-semibold text-base tracking-tight">Agent Hiring Board</span>
+          <span className="font-semibold text-base tracking-tight">Hyeron</span>
         </Link>
 
         {/* Nav */}
@@ -64,9 +69,9 @@ export function Header() {
               <Tooltip>
                 <TooltipTrigger render={
                   <Link href="/profile">
-                    <Button variant="outline" size="sm" className="gap-2 h-8 font-mono border-primary/30 hover:border-primary/60 hover:bg-primary/10">
+                    <Button variant="outline" size="sm" className="gap-2 h-8 font-mono border-hyeron-purple/30 hover:border-hyeron-purple/60 hover:bg-hyeron-purple/10">
                       <Wallet size={13} />
-                      <span className="text-primary font-semibold">{user.hbarBalance.toFixed(2)}</span>
+                      <span className="text-hyeron-purple font-semibold">{user.hbarBalance.toFixed(2)}</span>
                       <span className="text-muted-foreground text-xs">ℏ</span>
                     </Button>
                   </Link>

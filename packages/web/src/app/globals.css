@@ -5,61 +5,196 @@
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: oklch(0.35 0 0); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.45 0 0); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
 @layer base {
   :root {
-    --background: oklch(0.118 0.006 285);
-    --foreground: oklch(0.97 0.002 285);
-    --card: oklch(0.155 0.006 285);
-    --card-foreground: oklch(0.97 0.002 285);
-    --popover: oklch(0.155 0.006 285);
-    --popover-foreground: oklch(0.97 0.002 285);
-    --primary: oklch(0.65 0.22 292);
-    --primary-foreground: oklch(0.98 0.002 285);
-    --secondary: oklch(0.2 0.006 285);
-    --secondary-foreground: oklch(0.97 0.002 285);
-    --muted: oklch(0.2 0.006 285);
-    --muted-foreground: oklch(0.58 0.01 285);
-    --accent: oklch(0.22 0.015 292);
-    --accent-foreground: oklch(0.97 0.002 285);
+    --background: oklch(0.085 0.015 285);
+    --foreground: oklch(0.97 0.005 285);
+    --card: oklch(0.12 0.018 285);
+    --card-foreground: oklch(0.97 0.005 285);
+    --popover: oklch(0.12 0.018 285);
+    --popover-foreground: oklch(0.97 0.005 285);
+    --primary: oklch(0.65 0.25 295);
+    --primary-foreground: oklch(0.98 0.005 285);
+    --secondary: oklch(0.15 0.015 285);
+    --secondary-foreground: oklch(0.97 0.005 285);
+    --muted: oklch(0.17 0.015 285);
+    --muted-foreground: oklch(0.55 0.012 285);
+    --accent: oklch(0.17 0.025 295);
+    --accent-foreground: oklch(0.97 0.005 285);
     --destructive: oklch(0.62 0.22 25);
     --destructive-foreground: oklch(0.98 0.002 285);
     --border: oklch(1 0 0 / 8%);
     --input: oklch(1 0 0 / 10%);
-    --ring: oklch(0.65 0.22 292);
+    --ring: oklch(0.65 0.25 295);
     --radius: 0.75rem;
   }
 
   * {
-    border-color: rgb(255 255 255 / 8%);
+    border-color: rgba(255, 255, 255, 0.08);
     box-sizing: border-box;
   }
 
   body {
-    background-color: oklch(0.118 0.006 285);
-    color: oklch(0.97 0.002 285);
+    background-color: oklch(0.085 0.015 285);
+    color: oklch(0.97 0.005 285);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer utilities {
   .gradient-border {
     background:
-      linear-gradient(oklch(0.118 0.006 285), oklch(0.118 0.006 285)) padding-box,
-      linear-gradient(135deg, oklch(0.65 0.22 292 / 60%), oklch(0.7 0.15 220 / 40%)) border-box;
+      linear-gradient(oklch(0.085 0.015 285), oklch(0.085 0.015 285)) padding-box,
+      linear-gradient(135deg, oklch(0.65 0.25 295 / 60%), oklch(0.55 0.2 295 / 30%)) border-box;
     border: 1px solid transparent;
   }
 
   .glow-purple {
-    box-shadow: 0 0 24px oklch(0.65 0.22 292 / 20%), 0 0 8px oklch(0.65 0.22 292 / 10%);
+    box-shadow: 0 0 20px oklch(0.65 0.25 295 / 18%), 0 0 6px oklch(0.65 0.25 295 / 10%);
+  }
+
+  /* Alias for backward compat */
+  .glow-green {
+    box-shadow: 0 0 20px oklch(0.65 0.25 295 / 18%), 0 0 6px oklch(0.65 0.25 295 / 10%);
   }
 
   .glass {
     background: oklch(1 0 0 / 4%);
     backdrop-filter: blur(12px);
     border: 1px solid oklch(1 0 0 / 8%);
+  }
+
+  .glass-strong {
+    background: oklch(1 0 0 / 5%);
+    backdrop-filter: blur(24px);
+    border: 1px solid oklch(1 0 0 / 10%);
+  }
+
+  /* Text gradient — purple spectrum only */
+  .text-gradient {
+    background: linear-gradient(135deg, #C084FC 0%, #A855F7 50%, #7C3AED 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-subtle {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-gradient-radial {
+    background: radial-gradient(ellipse at 50% 0%, oklch(0.65 0.25 295 / 5%) 0%, transparent 60%);
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+}
+
+/* ── Keyframe Animations ── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes draw {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { filter: drop-shadow(0 0 3px oklch(0.65 0.25 295 / 30%)); }
+  50% { filter: drop-shadow(0 0 8px oklch(0.65 0.25 295 / 55%)); }
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, -15px) scale(1.03); }
+  66% { transform: translate(-8px, 10px) scale(0.97); }
+}
+
+@keyframes typingDot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Hero Orbs — purple spectrum ── */
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.1;
+  animation: orbFloat 10s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: #A855F7;
+  top: -15%;
+  right: -8%;
+}
+
+.hero-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: #7C3AED;
+  bottom: -15%;
+  left: -8%;
+  animation-delay: 3s;
+}
+
+.hero-orb-3 {
+  width: 300px;
+  height: 300px;
+  background: #C084FC;
+  top: 40%;
+  left: 25%;
+  animation-delay: 6s;
+  opacity: 0.05;
+}
+
+/* ── Reduced Motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .hero-orb {
+    animation: none !important;
+    opacity: 0.06;
   }
 }

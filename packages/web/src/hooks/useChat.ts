@@ -36,7 +36,7 @@ const WELCOME: ChatMessage = {
   id: 'welcome',
   role: 'dispatcher',
   content:
-    "Hello! I'm the Agent Hiring Board Dispatcher. I can help you with **text summarization**, **content generation**, or connect you with third-party agents. Describe your task below.",
+    "Hello! I'm the Hyeron Dispatcher. I can help you with **text summarization**, **content generation**, or connect you with third-party agents. Describe your task below.",
 };
 
 // Terminal statuses where the conversation is read-only

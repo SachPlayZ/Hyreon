@@ -148,7 +148,7 @@ router.post('/login-evm', async (req, res) => {
       return;
     }
 
-    const message = `Login to Agent Hiring Board\n\nAddress: ${address}\nTimestamp: ${timestamp}`;
+    const message = `Login to Hyeron\n\nAddress: ${address}\nTimestamp: ${timestamp}`;
     const { recoveredAddress, uncompressedPubKey } = verifyEvmSignature(address, message, signature);
     const normalizedAddress = recoveredAddress.toLowerCase();
 
