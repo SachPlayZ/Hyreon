@@ -163,6 +163,7 @@ model Task {
   platformFeeHbar       Float?      @map("platform_fee_hbar")
   userRating            Int?        @map("user_rating")
   userComment           String?     @map("user_comment")
+  ratingSkipped         Boolean     @default(false) @map("rating_skipped")
   ratingWindowClosesAt  DateTime?   @map("rating_window_closes_at")
   quoteData             Json?       @map("quote_data")
   requestBody           Json?       @map("request_body")

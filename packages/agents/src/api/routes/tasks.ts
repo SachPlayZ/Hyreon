@@ -238,7 +238,7 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
       if (task.userId !== userId) { res.status(403).json({ error: 'Unauthorized' }); return; }
       await prisma.task.update({
         where: { id: req.params.id },
-        data: { userRating: 0 },
+        data: { ratingSkipped: true },
       });
       res.json({ success: true });
     } catch (err: any) {
