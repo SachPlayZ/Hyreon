@@ -127,7 +127,7 @@ export function ChatWindow({
             {messages.map((msg) => (
               <div key={msg.id}>
                 {msg.role === 'progress' && msg.progressTaskId ? (
-                  <LiveTaskAccordion taskId={msg.progressTaskId} />
+                  <LiveTaskAccordion taskId={msg.progressTaskId} defaultCollapsed={msg.progressCollapsed} />
                 ) : msg.role === 'quote' && msg.quoteData ? (
                   <div className={cn('flex mb-4 gap-3', 'justify-start')}>
                     <div className="size-8 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0 mt-0.5">

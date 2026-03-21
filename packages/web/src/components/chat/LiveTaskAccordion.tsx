@@ -85,9 +85,9 @@ const INITIAL_STEPS: Step[] = [
   { name: 'Writing Receipt',   status: 'pending' },
 ];
 
-export function LiveTaskAccordion({ taskId }: { taskId: string }) {
+export function LiveTaskAccordion({ taskId, defaultCollapsed }: { taskId: string; defaultCollapsed?: boolean }) {
   const [steps, setSteps] = useState<Step[]>(INITIAL_STEPS);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(!defaultCollapsed);
   const [done, setDone] = useState(false);
 
   useEffect(() => {

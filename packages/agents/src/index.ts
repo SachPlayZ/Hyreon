@@ -2,8 +2,8 @@ import { config } from './config';
 import { getPrismaClient } from '@repo/database';
 import { getClient } from './hedera/client';
 import { createTopic } from './hedera/topics';
-import { registerAgent } from './hcs10/setup';
-import { createHCS10Client } from './hcs10/setup';
+import { registerAgent, createHCS10Client } from './hcs10/setup';
+import { ensureConnectionBetween } from './hcs10/connections';
 import { SummarizerWorker } from './workers/summarizer';
 import { ContentGenWorker } from './workers/content-gen';
 import { DispatcherAgent } from './dispatcher';
@@ -65,38 +65,12 @@ async function ensureConnection(
   dispatcherAgent: any,
   workerAgent: any,
 ) {
-  const existingConn = await prisma.connection.findFirst({
-    where: {
-      dispatcherAccountId: dispatcherAgent.accountId,
-      workerAccountId: workerAgent.accountId,
-    },
-  });
-
-  if (existingConn) {
-    console.log(
-      `[Init] Connection ${dispatcherAgent.name} <-> ${workerAgent.name} already exists (${existingConn.connectionTopicId})`
-    );
-    return existingConn;
-  }
-
-  console.log(`[Init] Creating connection topic ${dispatcherAgent.name} <-> ${workerAgent.name}...`);
-
-  // Create the connection topic directly with our operator client — bypasses the HCS-10
-  // handshake which requires signing as the agent sub-accounts (keys we don't hold)
-  const connectionTopicId = await createTopic(
-    `ahb:connection:${dispatcherAgent.accountId}:${workerAgent.accountId}`
+  return ensureConnectionBetween(
+    dispatcherAgent.accountId,
+    workerAgent.accountId,
+    dispatcherAgent.name,
+    workerAgent.name
   );
-
-  const conn = await prisma.connection.create({
-    data: {
-      dispatcherAccountId: dispatcherAgent.accountId,
-      workerAccountId: workerAgent.accountId,
-      connectionTopicId,
-    },
-  });
-
-  console.log(`[Init] Connection topic created: ${connectionTopicId}`);
-  return conn;
 }
 
 async function ensureTopics() {

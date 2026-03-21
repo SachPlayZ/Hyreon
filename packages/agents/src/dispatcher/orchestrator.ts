@@ -266,13 +266,6 @@ export class DispatcherOrchestrator {
         data: { status: 'HIRING', assignedWorkerId: worker.id },
       });
 
-      await prisma.chatMessage.create({
-        data: {
-          taskId,
-          role: 'DISPATCHER',
-          content: `Hired **${worker.name}** for this task. Rate: ${worker.rateHbar} HBAR + 5% platform fee = ${totalCost.toFixed(2)} HBAR total.${worker.isThirdParty ? ' (Third-party agent)' : ''}`,
-        },
-      });
       addStep('Hiring Worker', 'completed');
 
       // Step 3: Deduct balance
@@ -331,14 +324,7 @@ export class DispatcherOrchestrator {
         txId: escrow.txId,
         hashScanUrl: getHashScanTxUrl(escrow.txId),
       });
-      await prisma.chatMessage.create({
-        data: {
-          taskId,
-          role: 'DISPATCHER',
-          content: `Escrow of **${grossAmount} HBAR** logged on-chain (net to worker: ${escrow.netAmount.toFixed(2)} HBAR). [View on HashScan](${getHashScanTxUrl(escrow.txId)})`,
-          metadata: { escrowTxId: escrow.txId },
-        },
-      });
+      // Escrow step logged in timeline — no separate chat message
 
       // Step 5: Delegate — branch on third-party vs platform agent
       addStep('Delegating Task', 'active');
@@ -347,8 +333,8 @@ export class DispatcherOrchestrator {
       const classifiedType = task.classifiedType ?? 'SUMMARIZATION';
       let resultMessage: { result: string; status: string } | null = null;
 
-      if (worker.isThirdParty && worker.apiUrl) {
-        // ── Third-party agent: HTTP POST to their apiUrl ──
+      if (worker.isThirdParty && worker.thirdPartyProtocol === 'API' && worker.apiUrl) {
+        // ── Third-party API agent: HTTP POST to their apiUrl ──
         // Use the constructed requestBody if available, otherwise fall back to legacy format
         const requestBody = task.requestBody ?? {
           taskId,
@@ -358,13 +344,6 @@ export class DispatcherOrchestrator {
           slaSeconds: worker.slaSeconds,
         };
 
-        await prisma.chatMessage.create({
-          data: {
-            taskId,
-            role: 'DISPATCHER',
-            content: `Task sent to **${worker.name}**. Waiting for result (SLA: ${worker.slaSeconds}s)...`,
-          },
-        });
         addStep('Delegating Task', 'completed');
         addStep('Processing (third-party)', 'active');
 
@@ -406,7 +385,7 @@ export class DispatcherOrchestrator {
           resultMessage = null;
         }
       } else {
-        // ── Platform agent: HCS-10 messaging ──
+        // ── HCS-10 messaging (platform agents + HCS-10 third-party agents) ──
         const connection = await prisma.connection.findFirst({
           where: { workerAccountId: worker.accountId },
         });
@@ -432,13 +411,6 @@ export class DispatcherOrchestrator {
           `ahb:task:${taskId}`
         );
         addStep('Delegating Task', 'completed');
-        await prisma.chatMessage.create({
-          data: {
-            taskId,
-            role: 'DISPATCHER',
-            content: `Task delegated to ${worker.name} via HCS-10. Waiting for result (SLA: ${worker.slaSeconds}s)...`,
-          },
-        });
         addStep('Processing', 'active');
 
         // Poll for result notification — worker saves result to DB, sends small status-only HCS msg
@@ -575,14 +547,7 @@ export class DispatcherOrchestrator {
         txId: releaseTxId,
         hashScanUrl: releaseTxId !== 'offline' ? getHashScanTxUrl(releaseTxId) : undefined,
       });
-      await prisma.chatMessage.create({
-        data: {
-          taskId,
-          role: 'DISPATCHER',
-          content: `Payment of **${escrow.netAmount.toFixed(2)} HBAR** released to ${worker.name}${worker.isThirdParty ? ` (${worker.accountId})` : ''} + **${platformFee.toFixed(2)} HBAR** platform fee retained.${releaseTxId !== 'offline' ? ` [View on HashScan](${getHashScanTxUrl(releaseTxId)})` : ''}`,
-          metadata: { releaseTxId },
-        },
-      });
+      // Payment step logged in timeline — no separate chat message
 
       // Step 9: Receipt
       addStep('Writing Receipt', 'active');
@@ -636,12 +601,19 @@ export class DispatcherOrchestrator {
         txId: receipt.txId,
         hashScanUrl: getHashScanTopicUrl(this.receiptTopicId),
       });
+      // Save the final result as a single chat message (the actual agent output)
       await prisma.chatMessage.create({
         data: {
           taskId,
           role: 'DISPATCHER',
-          content: `On-chain receipt written to [HCS topic](${getHashScanTopicUrl(this.receiptTopicId)}) (seq: ${receipt.sequenceNumber}). Task complete! You have 10 minutes to rate this agent.`,
-          metadata: { receiptTopicId: this.receiptTopicId, receiptSequenceNumber: receipt.sequenceNumber },
+          content: resultMessage.result,
+          metadata: {
+            isResult: true,
+            receiptTopicId: this.receiptTopicId,
+            receiptSequenceNumber: receipt.sequenceNumber,
+            escrowTxId: escrow.txId,
+            releaseTxId,
+          },
         },
       });
 

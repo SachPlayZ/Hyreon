@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum AuthProvider {
@@ -46,6 +47,12 @@ enum TransactionType {
   REFUND
   USER_DEPOSIT
   PLATFORM_FEE
+}
+
+enum ThirdPartyProtocol {
+  API
+  HCS10_MANAGED
+  HCS10_SELF
 }
 
 enum MessageRole {
@@ -111,8 +118,13 @@ model Agent {
   exampleResponseBody Json?     @map("example_response_body")
   walletId         String?   @map("wallet_id")
   version          String    @default("1.0")
-  isThirdParty     Boolean   @default(false) @map("is_third_party")
-  ownerId          String?   @map("owner_id")
+  isThirdParty        Boolean            @default(false) @map("is_third_party")
+  thirdPartyProtocol  ThirdPartyProtocol @default(API) @map("third_party_protocol")
+  hcs10Verified       Boolean            @default(false) @map("hcs10_verified")
+  apiKeyHash          String?            @map("api_key_hash")
+  apiKeyPrefix        String?            @map("api_key_prefix")
+  connectionStatus    String             @default("none") @map("connection_status")
+  ownerId             String?            @map("owner_id")
   owner            User?     @relation("OwnedAgents", fields: [ownerId], references: [id])
   reputationScore  Float     @default(0.5) @map("reputation_score")
   ratingAvg        Float     @default(0) @map("rating_avg")

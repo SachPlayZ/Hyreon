@@ -30,6 +30,7 @@ export interface ChatMessage {
     ratingWindowClosesAt: string;
   };
   progressTaskId?: string;
+  progressCollapsed?: boolean;
 }
 
 const WELCOME: ChatMessage = {
@@ -76,15 +77,59 @@ export function useChat(opts?: UseChatOpts) {
       const data = await getTask(taskId);
       const task = data.task;
 
-      const loaded: ChatMessage[] = (task.chatMessages ?? []).map((m: any) => ({
-        id: `db-${m.id}`,
-        role: (m.role as string).toLowerCase() === 'user'
-          ? 'user'
-          : (m.role as string).toLowerCase() === 'system'
-          ? 'system'
-          : 'dispatcher',
-        content: m.content,
-      }));
+      const loaded: ChatMessage[] = (task.chatMessages ?? []).map((m: any) => {
+        const isResult = m.metadata?.isResult === true;
+        return {
+          id: `db-${m.id}`,
+          role: (m.role as string).toLowerCase() === 'user'
+            ? 'user'
+            : (m.role as string).toLowerCase() === 'system'
+            ? 'system'
+            : 'dispatcher',
+          content: m.content,
+          taskId: isResult ? task.id : undefined,
+          verification: isResult ? {
+            escrowTxId: m.metadata?.escrowTxId,
+            escrowHashScanUrl: m.metadata?.escrowTxId
+              ? `https://hashscan.io/testnet/transaction/${m.metadata.escrowTxId}` : undefined,
+            releaseTxId: m.metadata?.releaseTxId,
+            releaseHashScanUrl: m.metadata?.releaseTxId && m.metadata.releaseTxId !== 'offline'
+              ? `https://hashscan.io/testnet/transaction/${m.metadata.releaseTxId}` : undefined,
+            receiptTopicId: m.metadata?.receiptTopicId,
+            receiptTopicHashScanUrl: m.metadata?.receiptTopicId
+              ? `https://hashscan.io/testnet/topic/${m.metadata.receiptTopicId}` : undefined,
+          } : undefined,
+        };
+      });
+
+      // If the task has a result but no result chat message exists (legacy tasks),
+      // add the result as a final message
+      if (task.resultText && !loaded.some((m: ChatMessage) => m.verification)) {
+        loaded.push({
+          id: `db-result-${task.id}`,
+          role: 'dispatcher',
+          content: task.resultText,
+          taskId: task.id,
+        });
+      }
+
+      // Inject the progress accordion for tasks that have been executed
+      // so users can expand it and see the step-by-step process with checkmarks
+      const hasExecuted = [
+        'IN_PROGRESS', 'RATING_WINDOW', 'COMPLETED', 'ESCROW_RELEASED', 'REFUNDED', 'FAILED',
+      ].includes(task.status);
+      if (hasExecuted) {
+        // Find where to insert: after the user message, before the result
+        const resultIdx = loaded.findIndex((m: ChatMessage) => m.verification || m.taskId);
+        const insertAt = resultIdx >= 0 ? resultIdx : loaded.length;
+        loaded.splice(insertAt, 0, {
+          id: `progress-${task.id}`,
+          role: 'progress',
+          content: '',
+          progressTaskId: task.id,
+          progressCollapsed: true,
+        });
+      }
 
       setMessages(loaded.length > 0 ? loaded : [WELCOME]);
       setActiveTaskId(taskId);

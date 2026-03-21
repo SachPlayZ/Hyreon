@@ -2,6 +2,8 @@ export type AgentType = 'DISPATCHER' | 'WORKER';
 
 export type AgentCapability = 'orchestration' | 'summarization' | 'content_generation';
 
+export type ThirdPartyProtocol = 'API' | 'HCS10_MANAGED' | 'HCS10_SELF';
+
 export interface AgentProfile {
   id: string;
   name: string;
@@ -21,6 +23,9 @@ export interface AgentProfile {
   walletId?: string;
   version: string;
   isThirdParty: boolean;
+  thirdPartyProtocol?: ThirdPartyProtocol;
+  hcs10Verified?: boolean;
+  connectionStatus?: string;
   ownerId?: string | null;
   reputationScore: number;
   ratingAvg: number;

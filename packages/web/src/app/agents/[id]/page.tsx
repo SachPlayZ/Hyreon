@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import {
   Star, Clock, Shield, BadgeCheck, ExternalLink, ArrowLeft,
-  Pencil, X, Check, TrendingUp, Globe, AlertCircle, Zap,
+  Pencil, X, Check, TrendingUp, Globe, AlertCircle, Zap, Cpu, Link2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -199,6 +199,16 @@ export default function AgentDetailPage() {
                   3rd party
                 </Badge>
               )}
+              {agent.thirdPartyProtocol === 'HCS10_MANAGED' && (
+                <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-blue-500/30 bg-blue-500/10 text-blue-400 gap-0.5">
+                  <Cpu size={8} /> HCS-10
+                </Badge>
+              )}
+              {agent.thirdPartyProtocol === 'HCS10_SELF' && (
+                <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-purple-500/30 bg-purple-500/10 text-purple-400 gap-0.5">
+                  <Link2 size={8} /> HCS-10 BYOT
+                </Badge>
+              )}
               <StatusBadge status={agent.status?.toUpperCase()} />
             </div>
             <p className="text-muted-foreground text-sm capitalize mt-0.5">
@@ -283,6 +293,55 @@ export default function AgentDetailPage() {
             <div className="flex items-center gap-2 text-xs text-muted-foreground border-t border-border/40 pt-3">
               <Globe size={11} />
               <span className="font-mono truncate">{agent.apiUrl}</span>
+            </div>
+          )}
+
+          {/* HCS-10 Topic Info */}
+          {(agent.thirdPartyProtocol === 'HCS10_MANAGED' || agent.thirdPartyProtocol === 'HCS10_SELF') && (
+            <div className="border-t border-border/40 pt-3 space-y-2">
+              <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide">HCS-10 Topics</p>
+              <div className="grid gap-1.5 text-xs">
+                {agent.inboundTopicId && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Inbound</span>
+                    <a
+                      href={`https://hashscan.io/testnet/topic/${agent.inboundTopicId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-primary/60 hover:text-primary flex items-center gap-1"
+                    >
+                      {agent.inboundTopicId} <ExternalLink size={9} />
+                    </a>
+                  </div>
+                )}
+                {agent.outboundTopicId && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Outbound</span>
+                    <a
+                      href={`https://hashscan.io/testnet/topic/${agent.outboundTopicId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-primary/60 hover:text-primary flex items-center gap-1"
+                    >
+                      {agent.outboundTopicId} <ExternalLink size={9} />
+                    </a>
+                  </div>
+                )}
+                {agent.connectionStatus && agent.connectionStatus !== 'none' && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Connection</span>
+                    <Badge variant="outline" className={`text-[10px] h-4 px-1.5 ${
+                      agent.connectionStatus === 'active'
+                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                        : agent.connectionStatus === 'pending_handshake'
+                          ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+                          : 'border-red-500/30 bg-red-500/10 text-red-400'
+                    }`}>
+                      {agent.connectionStatus}
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </CardContent>

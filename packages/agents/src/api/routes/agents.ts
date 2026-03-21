@@ -1,22 +1,58 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { getPrismaClient } from '@repo/database';
 import { buildReputationBreakdown } from '../../dispatcher/reputation';
+import { registerAgent } from '../../hcs10/setup';
+import { createHCS10Client } from '../../hcs10/setup';
+import {
+  ensureConnectionBetween,
+  initiateHCS10Handshake,
+  checkHandshakeComplete,
+  verifyTopicExists,
+  verifyAccountExists,
+} from '../../hcs10/connections';
 
 const prisma = getPrismaClient();
 const router = Router();
 
 const AGENT_REGISTRATION_DEPOSIT_HBAR = 10;
 
+// ── Helper: generate API key for HCS-10 third-party agents ──
+function generateApiKey(): { raw: string; hash: string; prefix: string } {
+  const raw = `ahb_${crypto.randomBytes(32).toString('hex')}`;
+  const hash = crypto.createHash('sha256').update(raw).digest('hex');
+  const prefix = raw.slice(0, 12);
+  return { raw, hash, prefix };
+}
+
+// ── Helper: verify API key ──
+async function verifyAgentApiKey(agentId: string, token: string): Promise<boolean> {
+  const agent = await prisma.agent.findUnique({ where: { id: agentId } });
+  if (!agent || !agent.apiKeyHash) return false;
+  const hash = crypto.createHash('sha256').update(token).digest('hex');
+  return hash === agent.apiKeyHash;
+}
+
+// ── Helper: get dispatcher account ID ──
+async function getDispatcherAccountId(): Promise<string | null> {
+  const dispatcher = await prisma.agent.findFirst({ where: { type: 'DISPATCHER' } });
+  return dispatcher?.accountId ?? null;
+}
+
 // POST /api/agents/register — third-party agent registration
-// Requires the registering user to have 10 HBAR on their platform balance (registration deposit).
+// Supports three protocols: 'api' (default), 'hcs10_managed', 'hcs10_self'
 router.post('/register', async (req, res) => {
   try {
     const {
       agentName, apiUrl, taskType, priceHbar, slaSeconds, description, userId,
       exampleRequestBody, requestFieldsConfig, exampleResponseBody,
+      protocol,
+      // Flow B fields
+      accountId: selfAccountId, inboundTopicId: selfInboundTopicId,
+      outboundTopicId: selfOutboundTopicId, profileTopicId: selfProfileTopicId,
     } = req.body as {
       agentName: string;
-      apiUrl: string;
+      apiUrl?: string;
       taskType: string;
       priceHbar: number;
       slaSeconds?: number;
@@ -25,20 +61,43 @@ router.post('/register', async (req, res) => {
       exampleRequestBody?: any;
       requestFieldsConfig?: any;
       exampleResponseBody?: any;
+      protocol?: 'api' | 'hcs10_managed' | 'hcs10_self';
+      accountId?: string;
+      inboundTopicId?: string;
+      outboundTopicId?: string;
+      profileTopicId?: string;
     };
 
-    if (!agentName || !apiUrl || !taskType || !priceHbar || !userId) {
-      res.status(400).json({ error: 'agentName, apiUrl, taskType, priceHbar and userId are required' });
+    const agentProtocol = protocol ?? 'api';
+
+    // ── Common validation ──
+    if (!agentName || !taskType || !priceHbar || !userId) {
+      res.status(400).json({ error: 'agentName, taskType, priceHbar and userId are required' });
       return;
     }
 
-    // Validate apiUrl
-    try { new URL(apiUrl); } catch {
-      res.status(400).json({ error: 'apiUrl must be a valid URL' });
-      return;
+    // ── Protocol-specific validation ──
+    if (agentProtocol === 'api') {
+      if (!apiUrl) {
+        res.status(400).json({ error: 'apiUrl is required for API protocol agents' });
+        return;
+      }
+      try { new URL(apiUrl); } catch {
+        res.status(400).json({ error: 'apiUrl must be a valid URL' });
+        return;
+      }
     }
 
-    // Verify the registering user exists and has enough balance for the deposit
+    if (agentProtocol === 'hcs10_self') {
+      if (!selfAccountId || !selfInboundTopicId || !selfOutboundTopicId) {
+        res.status(400).json({
+          error: 'accountId, inboundTopicId, and outboundTopicId are required for HCS-10 self-managed agents',
+        });
+        return;
+      }
+    }
+
+    // ── Verify user and balance ──
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       res.status(404).json({ error: 'User not found — you must be logged in to register an agent' });
@@ -53,25 +112,136 @@ router.post('/register', async (req, res) => {
       return;
     }
 
-    // Use the registering user's Hedera account for payouts
-    const accountId = user.hederaAccountId;
-
     const capability = taskType.toLowerCase().replace(/\s+/g, '_');
+    let agentAccountId = user.hederaAccountId;
+    let inboundTopicId: string | null = null;
+    let outboundTopicId: string | null = null;
+    let profileTopicId: string | null = null;
+    let connectionTopicId: string | null = null;
+    let apiKeyRaw: string | null = null;
+    let apiKeyHash: string | null = null;
+    let apiKeyPrefix: string | null = null;
+    let connectionStatus = 'none';
+    let hcs10Verified = false;
 
-    // Verify the API is reachable with a HEAD request to the actual URL
-    try {
-      const pingRes = await fetch(apiUrl, {
-        method: 'HEAD',
-        signal: AbortSignal.timeout(5000),
-      });
-      if (!pingRes.ok && pingRes.status !== 404 && pingRes.status !== 405) {
-        console.warn(`[agents/register] Ping returned ${pingRes.status} for ${apiUrl}`);
+    // ── Protocol: API (existing behavior) ──
+    if (agentProtocol === 'api') {
+      // Verify the API is reachable
+      try {
+        const pingRes = await fetch(apiUrl!, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!pingRes.ok && pingRes.status !== 404 && pingRes.status !== 405) {
+          console.warn(`[agents/register] Ping returned ${pingRes.status} for ${apiUrl}`);
+        }
+      } catch {
+        console.warn(`[agents/register] Could not reach ${apiUrl} — registering anyway`);
       }
-    } catch {
-      console.warn(`[agents/register] Could not reach ${apiUrl} — registering anyway`);
     }
 
-    // Atomically deduct the registration deposit and create the agent
+    // ── Protocol: HCS10_MANAGED (Flow A) ──
+    if (agentProtocol === 'hcs10_managed') {
+      console.log(`[agents/register] Creating HCS-10 infrastructure for ${agentName}...`);
+
+      const result = await registerAgent({
+        name: agentName,
+        description: description ?? `Third-party agent: ${agentName}`,
+        capability,
+        agentType: 'worker',
+        taskName: taskType,
+        priceHbar,
+        slaSeconds: slaSeconds ?? 120,
+      });
+
+      agentAccountId = result.accountId;
+      inboundTopicId = result.inboundTopicId;
+      outboundTopicId = result.outboundTopicId;
+      profileTopicId = result.profileTopicId;
+
+      // Create connection with dispatcher
+      const dispatcherAccountId = await getDispatcherAccountId();
+      if (dispatcherAccountId) {
+        const conn = await ensureConnectionBetween(
+          dispatcherAccountId,
+          result.accountId,
+          'DispatcherBot',
+          agentName
+        );
+        connectionTopicId = conn.connectionTopicId;
+        connectionStatus = 'active';
+      }
+
+      // Generate API key for external task interaction
+      const key = generateApiKey();
+      apiKeyRaw = key.raw;
+      apiKeyHash = key.hash;
+      apiKeyPrefix = key.prefix;
+      hcs10Verified = true;
+
+      console.log(`[agents/register] HCS-10 agent ${agentName} registered: ${agentAccountId}`);
+    }
+
+    // ── Protocol: HCS10_SELF (Flow B) ──
+    if (agentProtocol === 'hcs10_self') {
+      console.log(`[agents/register] Verifying self-managed HCS-10 agent ${agentName}...`);
+
+      // Verify topics and account exist on-chain
+      const [acctOk, inOk, outOk] = await Promise.all([
+        verifyAccountExists(selfAccountId!),
+        verifyTopicExists(selfInboundTopicId!),
+        verifyTopicExists(selfOutboundTopicId!),
+      ]);
+
+      if (!acctOk) {
+        res.status(400).json({ error: `Account ${selfAccountId} not found on Hedera testnet` });
+        return;
+      }
+      if (!inOk) {
+        res.status(400).json({ error: `Inbound topic ${selfInboundTopicId} not found on Hedera testnet` });
+        return;
+      }
+      if (!outOk) {
+        res.status(400).json({ error: `Outbound topic ${selfOutboundTopicId} not found on Hedera testnet` });
+        return;
+      }
+
+      agentAccountId = selfAccountId!;
+      inboundTopicId = selfInboundTopicId!;
+      outboundTopicId = selfOutboundTopicId!;
+      profileTopicId = selfProfileTopicId ?? null;
+      hcs10Verified = true;
+
+      // Initiate HCS-10 handshake (async — agent must accept on their side)
+      const dispatcherAccountId = await getDispatcherAccountId();
+      if (dispatcherAccountId) {
+        try {
+          const dispatcher = await prisma.agent.findFirst({ where: { type: 'DISPATCHER' } });
+          const dispatcherClient = createHCS10Client(dispatcher?.accountId ?? undefined);
+          await initiateHCS10Handshake(dispatcherClient, selfInboundTopicId!);
+          connectionStatus = 'pending_handshake';
+          console.log(`[agents/register] HCS-10 handshake initiated with ${agentName}`);
+        } catch (err: any) {
+          console.warn(`[agents/register] Could not initiate handshake: ${err.message}`);
+          connectionStatus = 'handshake_failed';
+        }
+      }
+
+      // Generate API key
+      const key = generateApiKey();
+      apiKeyRaw = key.raw;
+      apiKeyHash = key.hash;
+      apiKeyPrefix = key.prefix;
+    }
+
+    // ── Map protocol string to enum ──
+    const thirdPartyProtocol = agentProtocol === 'hcs10_managed'
+      ? 'HCS10_MANAGED' as const
+      : agentProtocol === 'hcs10_self'
+        ? 'HCS10_SELF' as const
+        : 'API' as const;
+
+    // ── Atomically deduct deposit and create agent ──
     const [, agent] = await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
@@ -85,13 +255,21 @@ router.post('/register', async (req, res) => {
           name: agentName,
           type: 'WORKER',
           capability,
-          accountId,
-          apiUrl,
+          accountId: agentAccountId,
+          inboundTopicId,
+          outboundTopicId,
+          profileTopicId,
+          apiUrl: agentProtocol === 'api' ? apiUrl : null,
           taskName: taskType,
           rateHbar: priceHbar,
           slaSeconds: slaSeconds ?? 120,
           description,
           isThirdParty: true,
+          thirdPartyProtocol,
+          hcs10Verified,
+          apiKeyHash,
+          apiKeyPrefix,
+          connectionStatus,
           ownerId: userId,
           version: '1.0',
           exampleRequestBody: exampleRequestBody ?? undefined,
@@ -110,8 +288,25 @@ router.post('/register', async (req, res) => {
       }),
     ]);
 
-    res.status(201).json({ agent, depositCharged: AGENT_REGISTRATION_DEPOSIT_HBAR });
+    // ── Build response ──
+    const response: any = { agent, depositCharged: AGENT_REGISTRATION_DEPOSIT_HBAR };
+
+    if (agentProtocol !== 'api') {
+      response.hcs10 = {
+        accountId: agentAccountId,
+        inboundTopicId,
+        outboundTopicId,
+        profileTopicId,
+        connectionTopicId,
+        connectionStatus,
+      };
+      // Return API key only once at registration
+      response.apiKey = apiKeyRaw;
+    }
+
+    res.status(201).json(response);
   } catch (err: any) {
+    console.error('[agents/register] Error:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -138,6 +333,167 @@ router.get('/:id', async (req, res) => {
       return;
     }
     res.json({ agent });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agents/:id/connection-status — check HCS-10 connection status
+router.get('/:id/connection-status', async (req, res) => {
+  try {
+    const agent = await prisma.agent.findUnique({ where: { id: req.params.id } });
+    if (!agent) {
+      res.status(404).json({ error: 'Agent not found' });
+      return;
+    }
+
+    // Check if a connection exists in the connections table
+    const connection = agent.accountId
+      ? await prisma.connection.findFirst({
+          where: { workerAccountId: agent.accountId },
+        })
+      : null;
+
+    res.json({
+      connectionStatus: agent.connectionStatus,
+      hasConnection: !!connection,
+      connectionTopicId: connection?.connectionTopicId ?? null,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/agents/:id/complete-connection — finalize HCS-10 handshake for Flow B
+router.post('/:id/complete-connection', async (req, res) => {
+  try {
+    const agent = await prisma.agent.findUnique({ where: { id: req.params.id } });
+    if (!agent) {
+      res.status(404).json({ error: 'Agent not found' });
+      return;
+    }
+    if (agent.thirdPartyProtocol !== 'HCS10_SELF') {
+      res.status(400).json({ error: 'This endpoint is only for HCS-10 self-managed agents' });
+      return;
+    }
+
+    // Check if connection already exists
+    const existingConn = agent.accountId
+      ? await prisma.connection.findFirst({
+          where: { workerAccountId: agent.accountId },
+        })
+      : null;
+
+    if (existingConn) {
+      await prisma.agent.update({
+        where: { id: agent.id },
+        data: { connectionStatus: 'active' },
+      });
+      res.json({
+        status: 'active',
+        connectionTopicId: existingConn.connectionTopicId,
+      });
+      return;
+    }
+
+    // Try to create a direct connection (fallback if handshake didn't complete)
+    const dispatcherAccountId = await getDispatcherAccountId();
+    if (!dispatcherAccountId || !agent.accountId) {
+      res.status(500).json({ error: 'Dispatcher not available' });
+      return;
+    }
+
+    const conn = await ensureConnectionBetween(
+      dispatcherAccountId,
+      agent.accountId,
+      'DispatcherBot',
+      agent.name
+    );
+
+    await prisma.agent.update({
+      where: { id: agent.id },
+      data: { connectionStatus: 'active' },
+    });
+
+    res.json({
+      status: 'active',
+      connectionTopicId: conn.connectionTopicId,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agents/:agentId/tasks/pending — external HCS-10 agents fetch assigned tasks
+router.get('/:agentId/tasks/pending', async (req, res) => {
+  try {
+    // Verify API key
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'API key required' });
+      return;
+    }
+    const token = authHeader.slice(7);
+    const valid = await verifyAgentApiKey(req.params.agentId, token);
+    if (!valid) {
+      res.status(403).json({ error: 'Invalid API key' });
+      return;
+    }
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        assignedWorkerId: req.params.agentId,
+        status: { in: ['IN_PROGRESS', 'ESCROW_CREATED', 'GATHERING_INPUTS'] },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    res.json({ tasks });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/agents/:agentId/tasks/:taskId/result — external HCS-10 agents submit results
+router.post('/:agentId/tasks/:taskId/result', async (req, res) => {
+  try {
+    // Verify API key
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      res.status(401).json({ error: 'API key required' });
+      return;
+    }
+    const token = authHeader.slice(7);
+    const valid = await verifyAgentApiKey(req.params.agentId, token);
+    if (!valid) {
+      res.status(403).json({ error: 'Invalid API key' });
+      return;
+    }
+
+    const { resultText } = req.body as { resultText: string };
+    if (!resultText) {
+      res.status(400).json({ error: 'resultText is required' });
+      return;
+    }
+
+    // Verify the task belongs to this agent
+    const task = await prisma.task.findFirst({
+      where: {
+        id: req.params.taskId,
+        assignedWorkerId: req.params.agentId,
+      },
+    });
+    if (!task) {
+      res.status(404).json({ error: 'Task not found or not assigned to this agent' });
+      return;
+    }
+
+    const updated = await prisma.task.update({
+      where: { id: req.params.taskId },
+      data: { resultText },
+    });
+
+    res.json({ task: updated });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

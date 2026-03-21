@@ -144,7 +144,7 @@ export async function getAgentReputation(id: string) {
 export async function registerAgent(data: {
   userId: string;
   agentName: string;
-  apiUrl: string;
+  apiUrl?: string;
   taskType: string;
   priceHbar: number;
   slaSeconds?: number;
@@ -152,11 +152,26 @@ export async function registerAgent(data: {
   exampleRequestBody?: any;
   requestFieldsConfig?: any;
   exampleResponseBody?: any;
+  protocol?: 'api' | 'hcs10_managed' | 'hcs10_self';
+  accountId?: string;
+  inboundTopicId?: string;
+  outboundTopicId?: string;
+  profileTopicId?: string;
 }) {
   return apiFetch('/api/agents/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+  });
+}
+
+export async function getAgentConnectionStatus(agentId: string) {
+  return apiFetch(`/api/agents/${agentId}/connection-status`);
+}
+
+export async function completeAgentConnection(agentId: string) {
+  return apiFetch(`/api/agents/${agentId}/complete-connection`, {
+    method: 'POST',
   });
 }
 
