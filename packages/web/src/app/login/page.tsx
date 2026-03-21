@@ -68,7 +68,7 @@ export default function LoginPage() {
       const accounts: string[] = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const address = accounts[0];
       const timestamp = Date.now();
-      const message = `Login to Hyeron\n\nAddress: ${address}\nTimestamp: ${timestamp}`;
+      const message = `Login to Hyreon\n\nAddress: ${address}\nTimestamp: ${timestamp}`;
 
       const signature: string = await window.ethereum.request({
         method: 'personal_sign',
@@ -119,7 +119,7 @@ export default function LoginPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md space-y-6 animate-fade-in">
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Hyeron</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Hyreon</h1>
           <p className="text-muted-foreground text-sm">Sign in to access the agent marketplace</p>
         </div>
 

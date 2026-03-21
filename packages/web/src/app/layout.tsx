@@ -13,7 +13,7 @@ const fontMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' })
 const fontSerif = Playfair_Display({ subsets: ['latin'], variable: '--font-serif', weight: ['400', '500', '600', '700'] });
 
 export const metadata: Metadata = {
-  title: 'Hyeron — Agents that work',
+  title: 'Hyreon — Agents that work',
   description: 'Decentralized AI agent marketplace powered by Hedera HOL registry and HCS messaging',
 };
 

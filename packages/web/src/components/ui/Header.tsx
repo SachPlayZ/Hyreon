@@ -27,12 +27,12 @@ export function Header() {
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="size-8 rounded-lg bg-hyeron-purple/10 border border-hyeron-purple/20 flex items-center justify-center transition-all group-hover:bg-hyeron-purple/15 group-hover:border-hyeron-purple/30">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-hyeron-purple">
+          <div className="size-8 rounded-lg bg-hyreon-purple/10 border border-hyreon-purple/20 flex items-center justify-center transition-all group-hover:bg-hyreon-purple/15 group-hover:border-hyreon-purple/30">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-hyreon-purple">
               <path d="M6 7v10M18 7v10M6 12h12M6 9h12M6 15h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
-          <span className="font-semibold text-base tracking-tight">Hyeron</span>
+          <span className="font-semibold text-base tracking-tight">Hyreon</span>
         </Link>
 
         {/* Nav */}
@@ -69,9 +69,9 @@ export function Header() {
               <Tooltip>
                 <TooltipTrigger render={
                   <Link href="/profile">
-                    <Button variant="outline" size="sm" className="gap-2 h-8 font-mono border-hyeron-purple/30 hover:border-hyeron-purple/60 hover:bg-hyeron-purple/10">
+                    <Button variant="outline" size="sm" className="gap-2 h-8 font-mono border-hyreon-purple/30 hover:border-hyreon-purple/60 hover:bg-hyreon-purple/10">
                       <Wallet size={13} />
-                      <span className="text-hyeron-purple font-semibold">{user.hbarBalance.toFixed(2)}</span>
+                      <span className="text-hyreon-purple font-semibold">{user.hbarBalance.toFixed(2)}</span>
                       <span className="text-muted-foreground text-xs">ℏ</span>
                     </Button>
                   </Link>

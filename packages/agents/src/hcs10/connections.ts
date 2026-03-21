@@ -14,7 +14,7 @@ export async function initiateConnection(
 ): Promise<string> {
   const receipt = await client.submitConnectionRequest(
     workerInboundTopicId,
-    'Hyeron connection request'
+    'Hyreon connection request'
   ) as any;
   return receipt.transactionId.toString();
 }
@@ -98,7 +98,7 @@ export async function initiateHCS10Handshake(
 ): Promise<{ connectionRequestId: string }> {
   const receipt = await client.submitConnectionRequest(
     workerInboundTopicId,
-    'Hyeron marketplace connection request'
+    'Hyreon marketplace connection request'
   ) as any;
   return { connectionRequestId: receipt.transactionId.toString() };
 }

@@ -97,11 +97,11 @@ function LandingNav({ loggedIn }: { loggedIn: boolean }) {
       aria-label="Main navigation"
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
-        <Link href="/" className="flex items-center gap-3 group" aria-label="Hyeron home">
-          <div className="size-9 rounded-xl bg-hyeron-purple/10 border border-hyeron-purple/20 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+        <Link href="/" className="flex items-center gap-3 group" aria-label="Hyreon home">
+          <div className="size-9 rounded-xl bg-hyreon-purple/10 border border-hyreon-purple/20 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
             <HederaIcon size={18} />
           </div>
-          <span className="font-semibold text-lg tracking-tight text-foreground">Hyeron</span>
+          <span className="font-semibold text-lg tracking-tight text-foreground">Hyreon</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
@@ -129,7 +129,7 @@ function LandingNav({ loggedIn }: { loggedIn: boolean }) {
           <div className="hidden md:flex items-center gap-3">
             {loggedIn ? (
               <Link href="/chat">
-                <Button size="sm" className="h-9 px-5 bg-hyeron-purple text-white hover:bg-hyeron-purple/90 glow-purple font-medium cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <Button size="sm" className="h-9 px-5 bg-hyreon-purple text-white hover:bg-hyreon-purple/90 glow-purple font-medium cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
                   Open App <ArrowRight size={14} className="ml-1" />
                 </Button>
               </Link>
@@ -141,7 +141,7 @@ function LandingNav({ loggedIn }: { loggedIn: boolean }) {
                   </Button>
                 </Link>
                 <Link href="/login">
-                  <Button size="sm" className="h-9 px-5 bg-hyeron-purple text-white hover:bg-hyeron-purple/90 glow-purple font-medium cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                  <Button size="sm" className="h-9 px-5 bg-hyreon-purple text-white hover:bg-hyreon-purple/90 glow-purple font-medium cursor-pointer transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
                     Get Started
                   </Button>
                 </Link>
@@ -166,7 +166,7 @@ function LandingNav({ loggedIn }: { loggedIn: boolean }) {
             ))}
             <div className="pt-3 border-t border-border/30">
               <Link href={loggedIn ? '/chat' : '/login'} onClick={() => setMobileOpen(false)}>
-                <Button className="w-full h-10 bg-hyeron-purple text-white hover:bg-hyeron-purple/90 font-medium cursor-pointer">
+                <Button className="w-full h-10 bg-hyreon-purple text-white hover:bg-hyreon-purple/90 font-medium cursor-pointer">
                   {loggedIn ? 'Open App' : 'Get Started'}
                 </Button>
               </Link>
@@ -191,10 +191,10 @@ function HeroSection({ loggedIn }: { loggedIn: boolean }) {
       <div className="relative max-w-5xl mx-auto px-6 text-center">
         {/* Badge */}
         <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-hyeron-purple/20 bg-hyeron-purple/5 text-sm text-hyeron-purple-light mb-8"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-hyreon-purple/20 bg-hyreon-purple/5 text-sm text-hyreon-purple-light mb-8"
           style={{ animation: 'fadeIn 0.6s ease-out both' }}
         >
-          <div className="size-1.5 rounded-full bg-hyeron-purple animate-pulse" aria-hidden="true" />
+          <div className="size-1.5 rounded-full bg-hyreon-purple animate-pulse" aria-hidden="true" />
           Powered by Hedera Hashgraph
         </div>
 
@@ -229,7 +229,7 @@ function HeroSection({ loggedIn }: { loggedIn: boolean }) {
           <Link href={loggedIn ? '/chat' : '/login'}>
             <Button
               size="lg"
-              className="h-13 px-8 text-base bg-hyeron-purple text-white hover:bg-hyeron-purple/90 glow-purple font-semibold rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+              className="h-13 px-8 text-base bg-hyreon-purple text-white hover:bg-hyreon-purple/90 glow-purple font-semibold rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               {loggedIn ? 'Open Dashboard' : 'Start Building'}
               <ArrowRight size={18} className="ml-2" />
@@ -293,21 +293,21 @@ function ChatPreview() {
   }, [visibleCount]);
 
   return (
-    <div className="glass-strong rounded-2xl p-px shadow-2xl shadow-hyeron-purple/5">
-      <div className="bg-hyeron-dark/90 rounded-2xl overflow-hidden flex flex-col" style={{ height: '420px' }}>
+    <div className="glass-strong rounded-2xl p-px shadow-2xl shadow-hyreon-purple/5">
+      <div className="bg-hyreon-dark/90 rounded-2xl overflow-hidden flex flex-col" style={{ height: '420px' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="size-7 rounded-lg bg-hyeron-purple/15 flex items-center justify-center">
-              <Sparkles size={14} className="text-hyeron-purple" />
+            <div className="size-7 rounded-lg bg-hyreon-purple/15 flex items-center justify-center">
+              <Sparkles size={14} className="text-hyreon-purple" />
             </div>
             <div className="text-left">
-              <span className="text-sm font-medium text-foreground/90 block leading-tight">Hyeron Dispatcher</span>
+              <span className="text-sm font-medium text-foreground/90 block leading-tight">Hyreon Dispatcher</span>
               <span className="text-[11px] text-muted-foreground/50">on Hedera Testnet</span>
             </div>
           </div>
           <div className="flex items-center gap-1.5" aria-hidden="true">
-            <div className="size-2 rounded-full bg-hyeron-purple/60" />
+            <div className="size-2 rounded-full bg-hyreon-purple/60" />
             <span className="text-[11px] text-muted-foreground/40">Live</span>
           </div>
         </div>
@@ -327,8 +327,8 @@ function ChatPreview() {
         <div className="px-4 md:px-5 pb-4 md:pb-5 pt-2 shrink-0 border-t border-white/[0.04]">
           <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-3">
             <span className="text-sm text-muted-foreground/40 flex-1 text-left">Describe your task...</span>
-            <div className="size-8 rounded-lg bg-hyeron-purple/20 flex items-center justify-center">
-              <Send size={14} className="text-hyeron-purple/60" />
+            <div className="size-8 rounded-lg bg-hyreon-purple/20 flex items-center justify-center">
+              <Send size={14} className="text-hyreon-purple/60" />
             </div>
           </div>
         </div>
@@ -341,7 +341,7 @@ function ChatBubble({ step }: { step: ChatStep }) {
   if (step.type === 'user') {
     return (
       <div className="flex justify-end" style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
-        <div className="max-w-[85%] bg-hyeron-purple/20 border border-hyeron-purple/15 rounded-2xl rounded-br-md px-4 py-2.5">
+        <div className="max-w-[85%] bg-hyreon-purple/20 border border-hyreon-purple/15 rounded-2xl rounded-br-md px-4 py-2.5">
           <p className="text-sm text-foreground/90 text-left">{step.content}</p>
         </div>
       </div>
@@ -353,16 +353,16 @@ function ChatBubble({ step }: { step: ChatStep }) {
       <div className="flex justify-start" style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
         <div className="max-w-[85%] bg-white/[0.03] border border-white/[0.06] rounded-2xl rounded-bl-md px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-hyeron-purple/10 border border-hyeron-purple/15 flex items-center justify-center shrink-0">
-              <Bot size={14} className="text-hyeron-purple" />
+            <div className="size-8 rounded-lg bg-hyreon-purple/10 border border-hyreon-purple/15 flex items-center justify-center shrink-0">
+              <Bot size={14} className="text-hyreon-purple" />
             </div>
             <div className="text-left">
               <p className="text-sm font-medium text-foreground/90">{step.content}</p>
-              <p className="text-xs text-hyeron-purple-light/70 mt-0.5">{step.meta}</p>
+              <p className="text-xs text-hyreon-purple-light/70 mt-0.5">{step.meta}</p>
             </div>
           </div>
           <div className="mt-2.5 flex gap-2">
-            <div className="flex-1 py-1.5 text-center text-xs font-medium rounded-lg bg-hyeron-purple/20 text-hyeron-purple-light border border-hyeron-purple/15">
+            <div className="flex-1 py-1.5 text-center text-xs font-medium rounded-lg bg-hyreon-purple/20 text-hyreon-purple-light border border-hyreon-purple/15">
               Hire Agent
             </div>
             <div className="flex-1 py-1.5 text-center text-xs font-medium rounded-lg bg-white/[0.04] text-muted-foreground/60 border border-white/[0.06]">
@@ -377,10 +377,10 @@ function ChatBubble({ step }: { step: ChatStep }) {
   if (step.type === 'system') {
     return (
       <div className="flex justify-center" style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-hyeron-purple/8 border border-hyeron-purple/10">
-          <Lock size={11} className="text-hyeron-purple/70" />
-          <span className="text-xs text-hyeron-purple-light/60">{step.content}</span>
-          {step.meta && <Check size={11} className="text-hyeron-purple/70" />}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-hyreon-purple/8 border border-hyreon-purple/10">
+          <Lock size={11} className="text-hyreon-purple/70" />
+          <span className="text-xs text-hyreon-purple-light/60">{step.content}</span>
+          {step.meta && <Check size={11} className="text-hyreon-purple/70" />}
         </div>
       </div>
     );
@@ -389,9 +389,9 @@ function ChatBubble({ step }: { step: ChatStep }) {
   if (step.type === 'result') {
     return (
       <div className="flex justify-start" style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
-        <div className="max-w-[85%] bg-hyeron-purple/8 border border-hyeron-purple/12 rounded-2xl rounded-bl-md px-4 py-3">
+        <div className="max-w-[85%] bg-hyreon-purple/8 border border-hyreon-purple/12 rounded-2xl rounded-bl-md px-4 py-3">
           <div className="flex items-start gap-2">
-            <Check size={14} className="text-hyeron-purple mt-0.5 shrink-0" />
+            <Check size={14} className="text-hyreon-purple mt-0.5 shrink-0" />
             <div className="text-left">
               <p className="text-sm text-foreground/90">{step.content}</p>
               {step.meta && <p className="text-xs text-muted-foreground/50 mt-1 font-mono">{step.meta}</p>}
@@ -407,7 +407,7 @@ function ChatBubble({ step }: { step: ChatStep }) {
     <div className="flex justify-start" style={{ animation: 'fadeInUp 0.3s ease-out both' }}>
       <div className="max-w-[85%] bg-white/[0.03] border border-white/[0.06] rounded-2xl rounded-bl-md px-4 py-2.5">
         <p className="text-sm text-foreground/80 text-left">{step.content}</p>
-        {step.meta && <p className="text-xs text-hyeron-purple-light/50 mt-1 text-left">{step.meta}</p>}
+        {step.meta && <p className="text-xs text-hyreon-purple-light/50 mt-1 text-left">{step.meta}</p>}
       </div>
     </div>
   );
@@ -421,7 +421,7 @@ function TypingIndicator() {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="size-1.5 rounded-full bg-hyeron-purple/50"
+              className="size-1.5 rounded-full bg-hyreon-purple/50"
               style={{ animation: `typingDot 1.4s ease-in-out ${i * 0.2}s infinite` }}
             />
           ))}
@@ -512,7 +512,7 @@ function FeaturesSection() {
       <div className="absolute inset-0 bg-gradient-radial" aria-hidden="true" />
       <div ref={ref} className="relative max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
-          <p className="text-sm font-medium text-hyeron-purple mb-3 uppercase tracking-wider">Features</p>
+          <p className="text-sm font-medium text-hyreon-purple mb-3 uppercase tracking-wider">Features</p>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-5">
             Everything you need to{' '}
             <span className="font-serif italic font-medium text-gradient pr-[0.05em]">hire AI agents</span>
@@ -526,12 +526,12 @@ function FeaturesSection() {
           {features.map((f, i) => (
             <div
               key={f.title}
-              className={`group relative p-6 rounded-2xl border border-border/30 bg-card/40 hover:bg-card/70 hover:border-hyeron-purple/15 transition-all duration-300 cursor-default
+              className={`group relative p-6 rounded-2xl border border-border/30 bg-card/40 hover:bg-card/70 hover:border-hyreon-purple/15 transition-all duration-300 cursor-default
                 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
               style={{ transitionDelay: `${i * 60}ms` }}
             >
-              <div className="size-11 rounded-xl bg-hyeron-purple/[0.07] border border-hyeron-purple/[0.12] flex items-center justify-center mb-4 group-hover:bg-hyeron-purple/[0.12] group-hover:border-hyeron-purple/[0.2] transition-all duration-300">
-                <f.icon size={20} className="text-hyeron-purple" strokeWidth={1.75} />
+              <div className="size-11 rounded-xl bg-hyreon-purple/[0.07] border border-hyreon-purple/[0.12] flex items-center justify-center mb-4 group-hover:bg-hyreon-purple/[0.12] group-hover:border-hyreon-purple/[0.2] transition-all duration-300">
+                <f.icon size={20} className="text-hyreon-purple" strokeWidth={1.75} />
               </div>
               <h3 className="text-base font-semibold mb-2 tracking-tight">{f.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
@@ -550,10 +550,10 @@ function ArchitectureSection() {
     <section id="architecture" className="py-24 md:py-32 relative overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16 md:mb-20">
-          <p className="text-sm font-medium text-hyeron-purple mb-3 uppercase tracking-wider">Architecture</p>
+          <p className="text-sm font-medium text-hyreon-purple mb-3 uppercase tracking-wider">Architecture</p>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-5">
             How{' '}
-            <span className="font-serif italic font-medium text-gradient pr-[0.05em]">Hyeron</span>
+            <span className="font-serif italic font-medium text-gradient pr-[0.05em]">Hyreon</span>
             {' '}connects the pieces
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
@@ -720,7 +720,7 @@ function ArchNodeAnimated({
       <div
         className={`size-14 md:size-16 rounded-2xl flex items-center justify-center border transition-all duration-300 ${
           highlight
-            ? 'bg-hyeron-purple/[0.1] border-hyeron-purple/25 text-hyeron-purple shadow-lg shadow-hyeron-purple/[0.08]'
+            ? 'bg-hyreon-purple/[0.1] border-hyreon-purple/25 text-hyreon-purple shadow-lg shadow-hyreon-purple/[0.08]'
             : 'bg-card/60 border-border/50 text-muted-foreground'
         }`}
       >
@@ -741,7 +741,7 @@ function HowItWorksSection() {
     {
       step: '01',
       title: 'Describe your task',
-      description: 'Tell Hyeron what you need in plain language. Our dispatcher classifies the task and finds the best-matched agents.',
+      description: 'Tell Hyreon what you need in plain language. Our dispatcher classifies the task and finds the best-matched agents.',
     },
     {
       step: '02',
@@ -765,7 +765,7 @@ function HowItWorksSection() {
       <div className="absolute inset-0 bg-gradient-radial" aria-hidden="true" />
       <div ref={ref} className="relative max-w-5xl mx-auto px-6">
         <div className="text-center mb-16">
-          <p className="text-sm font-medium text-hyeron-purple mb-3 uppercase tracking-wider">Process</p>
+          <p className="text-sm font-medium text-hyreon-purple mb-3 uppercase tracking-wider">Process</p>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
             Four steps. <span className="font-serif italic font-medium text-gradient pr-[0.05em]">Zero trust</span> required.
           </h2>
@@ -775,12 +775,12 @@ function HowItWorksSection() {
           {steps.map((s, i) => (
             <div
               key={s.step}
-              className={`group relative flex gap-5 p-6 rounded-2xl border border-border/25 bg-card/30 hover:bg-card/50 hover:border-hyeron-purple/15 transition-all duration-300 cursor-default
+              className={`group relative flex gap-5 p-6 rounded-2xl border border-border/25 bg-card/30 hover:bg-card/50 hover:border-hyreon-purple/15 transition-all duration-300 cursor-default
                 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
               style={{ transitionDelay: `${i * 80}ms` }}
             >
               <div className="shrink-0 pt-0.5">
-                <span className="text-3xl font-bold text-hyeron-purple/15 group-hover:text-hyeron-purple/30 transition-colors duration-300 font-mono select-none">
+                <span className="text-3xl font-bold text-hyreon-purple/15 group-hover:text-hyreon-purple/30 transition-colors duration-300 font-mono select-none">
                   {s.step}
                 </span>
               </div>
@@ -855,7 +855,7 @@ function CTASection({ loggedIn }: { loggedIn: boolean }) {
         <Link href={loggedIn ? '/chat' : '/login'}>
           <Button
             size="lg"
-            className="h-14 px-10 text-base bg-hyeron-purple text-white hover:bg-hyeron-purple/90 glow-purple font-semibold rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+            className="h-14 px-10 text-base bg-hyreon-purple text-white hover:bg-hyreon-purple/90 glow-purple font-semibold rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
           >
             {loggedIn ? 'Go to Dashboard' : 'Get Started — It\'s Free'}
             <ArrowRight size={18} className="ml-2" />
@@ -877,10 +877,10 @@ function Footer() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-hyeron-purple/[0.08] border border-hyeron-purple/15 flex items-center justify-center">
+            <div className="size-8 rounded-lg bg-hyreon-purple/[0.08] border border-hyreon-purple/15 flex items-center justify-center">
               <HederaIcon size={14} />
             </div>
-            <span className="font-semibold text-sm tracking-tight">Hyeron</span>
+            <span className="font-semibold text-sm tracking-tight">Hyreon</span>
             <span className="text-xs text-muted-foreground/60">— Agents that work</span>
           </div>
 

@@ -39,7 +39,7 @@ const config: Config = {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
-        hyeron: {
+        hyreon: {
           purple: '#A855F7',
           'purple-light': '#C084FC',
           'purple-dark': '#7C3AED',
