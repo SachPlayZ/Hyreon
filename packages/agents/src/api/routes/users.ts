@@ -20,7 +20,7 @@ import { encryptPrivateKey, decryptPrivateKey } from '../../hedera/keyEncryption
 import { lookupEvmAddress } from '../../hedera/mirror';
 
 const prisma = getPrismaClient();
-const router = Router();
+const router: Router = Router();
 
 // ── Helper: resolve EVM address for a user if missing ──
 async function resolveUserEvmAddress(user: any): Promise<any> {

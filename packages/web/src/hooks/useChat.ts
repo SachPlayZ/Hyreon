@@ -135,7 +135,25 @@ export function useChat(opts?: UseChatOpts) {
       setActiveTaskId(taskId);
       autoHiredRef.current = true; // prevent auto-hire when loading historical
 
-      if (task.status === 'RATING_WINDOW') {
+      if (task.status === 'QUOTING') {
+        // Re-hydrate the quote table from the stored quoteData
+        const qd = task.quoteData as any;
+        if (qd?.agents?.length) {
+          loaded.push({
+            id: `quote-${task.id}`,
+            role: 'quote',
+            content: `Task classified as **${qd.classifiedType ?? 'custom'}**. Here are available agents:`,
+            quoteData: {
+              agents: qd.agents,
+              userBalance: task.user?.hbarBalance ?? 0,
+              taskId: task.id,
+            },
+          });
+        }
+        setPhase('awaiting_selection');
+        setPendingTaskId(taskId);
+        setIsReadOnly(false);
+      } else if (task.status === 'RATING_WINDOW') {
         setPhase('rating_window');
         setPendingTaskId(taskId);
         setIsReadOnly(false);

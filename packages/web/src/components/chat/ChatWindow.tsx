@@ -57,12 +57,13 @@ export function ChatWindow({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, phase]);
 
-  // Load a specific historical conversation when selectedConversationId changes
+  // Load a specific historical conversation when selectedConversationId changes.
+  // Skip if the task was just created in this session (activeTaskId already matches) —
+  // loadConversation would wipe out the in-memory quote/progress state.
   useEffect(() => {
-    if (selectedConversationId) {
+    if (selectedConversationId && selectedConversationId !== activeTaskId) {
       loadConversation(selectedConversationId);
     }
-    // selectedConversationId === null means "new chat" — handled by startNewChat in parent
   }, [selectedConversationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Inform parent when a new task is created in this session
