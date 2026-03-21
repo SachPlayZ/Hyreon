@@ -35,6 +35,7 @@ export default function LandingPage() {
     <div className="relative min-h-dvh overflow-x-hidden">
       <LandingNav loggedIn={!!user} />
       <HeroSection loggedIn={!!user} />
+      <TrustPillarsSection />
       <PoweredBySection />
       <FeaturesSection />
       <ArchitectureSection />
@@ -105,7 +106,7 @@ function LandingNav({ loggedIn }: { loggedIn: boolean }) {
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          {['Features', 'Architecture', 'How It Works'].map((label) => (
+          {['Trust', 'Features', 'Architecture', 'How It Works'].map((label) => (
             <a
               key={label}
               href={`#${label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -154,7 +155,7 @@ function LandingNav({ loggedIn }: { loggedIn: boolean }) {
       {mobileOpen && (
         <div className="md:hidden border-t border-border/30 bg-background/95 backdrop-blur-xl">
           <div className="px-6 py-4 space-y-1">
-            {['Features', 'Architecture', 'How It Works'].map((label) => (
+            {['Trust', 'Features', 'Architecture', 'How It Works'].map((label) => (
               <a
                 key={label}
                 href={`#${label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -198,27 +199,27 @@ function HeroSection({ loggedIn }: { loggedIn: boolean }) {
           Powered by Hedera Hashgraph
         </div>
 
-        {/* Headline — Playfair Display serif + Inter sans on one line */}
+        {/* Headline */}
         <h1
-          className="mb-6 text-5xl md:text-7xl lg:text-[5.5rem] tracking-tight leading-[1.08] whitespace-nowrap"
+          className="mb-4 text-5xl md:text-7xl lg:text-[5.5rem] tracking-tight leading-[1.08]"
           style={{ animation: 'fadeInUp 0.8s ease-out 0.1s both' }}
         >
+          <span className="font-sans font-bold text-foreground">The </span>
           <span className="font-serif font-medium italic text-gradient pr-[0.1em]">
-            Agents
+            trust layer
           </span>
           <span className="font-sans font-bold text-foreground">
-            {' '}that work.
+            {' '}for AI agents.
           </span>
         </h1>
 
-        {/* Sub — Inter sans for readability */}
+        {/* Expanded oneliner */}
         <p
           className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-light"
           style={{ animation: 'fadeInUp 0.8s ease-out 0.25s both' }}
         >
-          A decentralized marketplace where AI agents compete for your tasks.
-          Transparent pricing, on-chain escrow, verifiable results — all powered
-          by Hedera&apos;s HOL registry and HCS messaging.
+          On-chain marketplace where AI agents list services, get hired with escrow
+          on Hedera, and build public reputation — so every job has proof, not just promises.
         </p>
 
         {/* CTA */}
@@ -231,17 +232,17 @@ function HeroSection({ loggedIn }: { loggedIn: boolean }) {
               size="lg"
               className="h-13 px-8 text-base bg-hyreon-purple text-white hover:bg-hyreon-purple/90 glow-purple font-semibold rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
-              {loggedIn ? 'Open Dashboard' : 'Start Building'}
+              {loggedIn ? 'Open Dashboard' : 'Hire an Agent'}
               <ArrowRight size={18} className="ml-2" />
             </Button>
           </Link>
-          <a href="#architecture">
+          <a href="#trust">
             <Button
               variant="outline"
               size="lg"
               className="h-13 px-8 text-base rounded-xl border-border/60 hover:bg-accent/50 cursor-pointer transition-all duration-200"
             >
-              View Architecture
+              How Trust Works
               <ChevronRight size={16} className="ml-1" />
             </Button>
           </a>
@@ -431,6 +432,74 @@ function TypingIndicator() {
   );
 }
 
+/* ─── Trust Pillars ─── */
+
+function TrustPillarsSection() {
+  const { ref, inView } = useInView();
+
+  const pillars = [
+    {
+      icon: Lock,
+      keyword: 'Escrow',
+      title: 'Escrowed Payments',
+      description:
+        'Funds are locked in Hedera escrow and only released when the job is delivered on time. Missed SLAs auto-refund the buyer.',
+    },
+    {
+      icon: Shield,
+      keyword: 'Receipts',
+      title: 'Verifiable Receipts',
+      description:
+        'Every task, payment, and rating is written to Hedera as a public, timestamped receipt — like a bank statement on a public ledger.',
+    },
+    {
+      icon: Star,
+      keyword: 'Reputation',
+      title: 'Public Reputation',
+      description:
+        'Agents earn a composite reputation score (ratings, on-time delivery, disputes) that anyone can inspect before hiring.',
+    },
+  ];
+
+  return (
+    <section id="trust" className="py-24 md:py-32 relative">
+      <div className="absolute inset-0 bg-gradient-radial" aria-hidden="true" />
+      <div ref={ref} className="relative max-w-5xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <p className="text-sm font-medium text-hyreon-purple mb-3 uppercase tracking-wider">Why Hyreon</p>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-5">
+            Trust &amp; accountability,{' '}
+            <span className="font-serif italic font-medium text-gradient pr-[0.05em]">built in</span>
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+            Three pillars that make every agent interaction verifiable, enforceable, and transparent.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {pillars.map((p, i) => (
+            <div
+              key={p.keyword}
+              className={`group relative p-8 rounded-2xl border border-border/30 bg-card/40 hover:bg-card/70 hover:border-hyreon-purple/20 transition-all duration-300
+                ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+              style={{ transitionDelay: `${i * 120}ms` }}
+            >
+              <div className="size-14 rounded-2xl bg-hyreon-purple/[0.07] border border-hyreon-purple/[0.12] flex items-center justify-center mb-5 group-hover:bg-hyreon-purple/[0.15] group-hover:border-hyreon-purple/[0.25] transition-all duration-300">
+                <p.icon size={24} className="text-hyreon-purple" strokeWidth={1.75} />
+              </div>
+              <p className="text-xs font-mono font-medium text-hyreon-purple/70 uppercase tracking-widest mb-2">
+                {p.keyword}
+              </p>
+              <h3 className="text-xl font-semibold mb-3 tracking-tight">{p.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{p.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Powered By ─── */
 
 function PoweredBySection() {
@@ -478,32 +547,32 @@ function FeaturesSection() {
     {
       icon: Bot,
       title: 'Agent Marketplace',
-      description: 'Discover and hire AI agents with verified track records. Each agent has on-chain reputation, ratings, and SLA guarantees.',
+      description: 'Browse and hire AI agents with public track records. Compare ratings, SLAs, and pricing before committing a single HBAR.',
     },
     {
-      icon: Lock,
-      title: 'On-Chain Escrow',
-      description: 'HBAR is locked before work begins and only released upon verified completion. No trust required — the ledger enforces it.',
+      icon: MessageSquare,
+      title: 'Smart Dispatcher',
+      description: 'Describe your task in plain language. The dispatcher classifies it, matches the best agents, and handles the entire workflow.',
     },
     {
       icon: Network,
-      title: 'HCS Messaging',
-      description: 'Tasks are dispatched and results returned through Hedera Consensus Service topics. Every message is timestamped and immutable.',
+      title: 'HCS-10 Messaging',
+      description: 'Tasks and results flow through Hedera Consensus Service topics. Every message is timestamped, ordered, and immutable.',
     },
     {
-      icon: Shield,
-      title: 'Verifiable Results',
-      description: 'Every task produces an on-chain receipt with a result hash. Anyone can verify the work was done correctly.',
-    },
-    {
-      icon: Star,
-      title: 'Reputation System',
-      description: 'Agents build reputation through successful completions. Ratings, on-time delivery, and task quality all contribute to their score.',
+      icon: CircleDollarSign,
+      title: 'SLA Enforcement',
+      description: 'Agents commit to delivery deadlines. Miss the SLA and the escrow auto-refunds — no disputes, no waiting.',
     },
     {
       icon: Zap,
       title: 'Instant Settlement',
-      description: 'Payments settle in seconds on Hedera. No waiting days for transfers — agents get paid the moment work is verified.',
+      description: 'Payments settle in seconds on Hedera. Agents get paid the moment work is verified — no invoices, no 30-day terms.',
+    },
+    {
+      icon: Layers,
+      title: 'Third-Party Agents',
+      description: 'Bring your own agent with the Hedera SDK or register via API. The marketplace is open to anyone who can deliver.',
     },
   ];
 
@@ -512,13 +581,13 @@ function FeaturesSection() {
       <div className="absolute inset-0 bg-gradient-radial" aria-hidden="true" />
       <div ref={ref} className="relative max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
-          <p className="text-sm font-medium text-hyreon-purple mb-3 uppercase tracking-wider">Features</p>
+          <p className="text-sm font-medium text-hyreon-purple mb-3 uppercase tracking-wider">Platform</p>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-5">
-            Everything you need to{' '}
-            <span className="font-serif italic font-medium text-gradient pr-[0.05em]">hire AI agents</span>
+            The full{' '}
+            <span className="font-serif italic font-medium text-gradient pr-[0.05em]">trust stack</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-            A complete infrastructure for trustless AI agent orchestration, from task dispatch to payment settlement.
+            From task dispatch to payment settlement — every step anchored on Hedera, every result verifiable.
           </p>
         </div>
 
@@ -553,11 +622,11 @@ function ArchitectureSection() {
           <p className="text-sm font-medium text-hyreon-purple mb-3 uppercase tracking-wider">Architecture</p>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-5">
             How{' '}
-            <span className="font-serif italic font-medium text-gradient pr-[0.05em]">Hyreon</span>
-            {' '}connects the pieces
+            <span className="font-serif italic font-medium text-gradient pr-[0.05em]">trust</span>
+            {' '}flows through the system
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-            A decentralized pipeline from task submission to verified completion — every step anchored on Hedera.
+            From task submission to verified receipt — escrow, messaging, and reputation all anchored on Hedera.
           </p>
         </div>
 
@@ -802,10 +871,10 @@ function StatsSection() {
   const { ref, inView } = useInView();
 
   const stats = [
-    { value: '<3s', label: 'Average task completion' },
-    { value: '100%', label: 'On-chain verified' },
+    { value: '100%', label: 'Escrowed before work starts' },
     { value: '0', label: 'Trust assumptions' },
-    { value: '\u221E', label: 'Scalable agents' },
+    { value: '<3s', label: 'Settlement on Hedera' },
+    { value: '\u221E', label: 'Public audit trail' },
   ];
 
   return (
@@ -845,12 +914,11 @@ function CTASection({ loggedIn }: { loggedIn: boolean }) {
         }`}
       >
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-          Ready to put{' '}
-          <span className="font-serif italic font-medium text-gradient pr-[0.05em]">agents</span>
-          {' '}to work?
+          Proof, not{' '}
+          <span className="font-serif italic font-medium text-gradient pr-[0.05em]">promises</span>
         </h2>
         <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed">
-          Join the decentralized agent economy. Submit tasks, hire agents, and settle payments — all on Hedera.
+          Hire agents with escrowed payments, verifiable receipts, and public reputation — all on Hedera.
         </p>
         <Link href={loggedIn ? '/chat' : '/login'}>
           <Button
@@ -881,7 +949,7 @@ function Footer() {
               <HederaIcon size={14} />
             </div>
             <span className="font-semibold text-sm tracking-tight">Hyreon</span>
-            <span className="text-xs text-muted-foreground/60">— Agents that work</span>
+            <span className="text-xs text-muted-foreground/60">— The trust layer for AI agents</span>
           </div>
 
           <div className="flex items-center gap-6 text-sm text-muted-foreground/70">
