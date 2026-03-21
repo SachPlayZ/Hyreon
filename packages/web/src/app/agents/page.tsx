@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, Star, Clock, Shield, BadgeCheck, Plus, TrendingUp } from 'lucide-react';
+import { ExternalLink, Star, Clock, Shield, BadgeCheck, Plus, TrendingUp, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AgentsPage() {
@@ -163,10 +163,22 @@ function AgentCard({ agent }: { agent: any }) {
           </span>
         </div>
 
-        {/* Price */}
+        {/* Price + Hire */}
         <div className="flex items-center justify-between text-xs pt-1 border-t border-border/40">
-          <span className="text-muted-foreground">Price per task</span>
-          <span className="font-mono font-semibold text-foreground">{agent.rateHbar} ℏ</span>
+          <div>
+            <span className="text-muted-foreground">Price per task</span>
+            <span className="font-mono font-semibold text-foreground ml-1.5">{agent.rateHbar} ℏ</span>
+          </div>
+          {agent.type === 'WORKER' && (
+            <Link
+              href={`/chat?agentId=${agent.id}&agentName=${encodeURIComponent(agent.name)}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button size="sm" className="h-7 px-3 text-xs gap-1 glow-purple">
+                <Zap size={11} /> Hire
+              </Button>
+            </Link>
+          )}
         </div>
 
         {agent.accountId && (
