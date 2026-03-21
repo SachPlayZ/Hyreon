@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback, useRef } from 'react';
-import { createQuote, confirmTask, rateTask, provideTaskInputs, getTask } from '@/lib/api';
+import { sendChatMessage, createQuote, confirmTask, rateTask, provideTaskInputs, getTask } from '@/lib/api';
 import { useUser } from '@/contexts/UserContext';
 
 export type ChatPhase =
@@ -37,7 +37,7 @@ const WELCOME: ChatMessage = {
   id: 'welcome',
   role: 'dispatcher',
   content:
-    "Hello! I'm the Hyreon Dispatcher. I can help you with **text summarization**, **content generation**, or connect you with third-party agents. Describe your task below.",
+    "Hello! I'm the Hyreon Dispatcher. I can help you hire AI agents for tasks like **summarization**, **content generation**, and more — or just chat with me if you have questions about the platform.",
 };
 
 // Terminal statuses where the conversation is read-only
@@ -288,26 +288,37 @@ export function useChat(opts?: UseChatOpts) {
         return;
       }
 
-      // Normal flow: create quote and show agent selection table
+      // Smart flow: detect intent — either create quote or respond conversationally
       setPhase('quoting');
       try {
-        const result = await createQuote(user.id, content);
-        setActiveTaskId(result.taskId);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `quote-${Date.now()}`,
-            role: 'quote',
-            content: `Task classified as **${result.classifiedType ?? 'custom'}**. Here are available agents:`,
-            quoteData: {
-              agents: result.agents,
-              userBalance: result.userBalance,
-              taskId: result.taskId,
+        const result = await sendChatMessage(user.id, content);
+
+        if (result.type === 'conversation') {
+          // Conversational reply — no task created
+          setMessages((prev) => [
+            ...prev,
+            { id: `dispatcher-${Date.now()}`, role: 'dispatcher', content: result.reply },
+          ]);
+          setPhase('idle');
+        } else {
+          // Task quote
+          setActiveTaskId(result.taskId);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `quote-${Date.now()}`,
+              role: 'quote',
+              content: `Task classified as **${result.classifiedType ?? 'custom'}**. Here are available agents:`,
+              quoteData: {
+                agents: result.agents,
+                userBalance: result.userBalance,
+                taskId: result.taskId,
+              },
             },
-          },
-        ]);
-        setPendingTaskId(result.taskId);
-        setPhase('awaiting_selection');
+          ]);
+          setPendingTaskId(result.taskId);
+          setPhase('awaiting_selection');
+        }
       } catch (err: any) {
         setMessages((prev) => [
           ...prev,

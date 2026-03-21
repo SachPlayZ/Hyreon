@@ -87,7 +87,7 @@ export function Header() {
                     </Button>
                   </Link>
                 } />
-                <TooltipContent>Profile</TooltipContent>
+                <TooltipContent>{user.evmAddress ? `${user.evmAddress.slice(0, 6)}…${user.evmAddress.slice(-4)}` : 'Profile'}</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger render={

@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import useSWR from 'swr';
 import { getAgents } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -7,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, Star, Clock, Shield, BadgeCheck, Plus, TrendingUp, Zap } from 'lucide-react';
+import { ExternalLink, Star, Clock, Shield, BadgeCheck, Plus, TrendingUp, Zap, Copy, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AgentsPage() {
@@ -111,6 +112,12 @@ function ReputationBar({ score }: { score: number }) {
 }
 
 function AgentCard({ agent }: { agent: any }) {
+  const [copied, setCopied] = useState('');
+  const copy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(''), 2000);
+  };
   return (
     <Link href={`/agents/${agent.id}`} className="block">
     <Card className="border-border/60 hover:border-primary/20 transition-colors group cursor-pointer">
@@ -182,15 +189,45 @@ function AgentCard({ agent }: { agent: any }) {
         </div>
 
         {agent.accountId && (
-          <a
-            href={`https://hashscan.io/testnet/account/${agent.accountId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors text-[10px] font-mono"
-          >
-            <ExternalLink size={9} /> {agent.accountId}
-          </a>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <a
+                href={`https://hashscan.io/testnet/account/${agent.accountId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors text-[10px] font-mono"
+              >
+                <ExternalLink size={9} /> {agent.accountId}
+              </a>
+              <button
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); copy(agent.accountId, 'acct'); }}
+                className="text-muted-foreground/40 hover:text-foreground transition-colors"
+              >
+                {copied === 'acct' ? <CheckCircle2 size={9} className="text-emerald-400" /> : <Copy size={9} />}
+              </button>
+            </div>
+            {agent.evmAddress && (
+              <div className="flex items-center gap-1.5">
+                <a
+                  href={`https://hashscan.io/testnet/account/${agent.evmAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1 text-muted-foreground/50 hover:text-primary transition-colors text-[10px] font-mono"
+                  title={agent.evmAddress}
+                >
+                  <ExternalLink size={9} /> {agent.evmAddress.slice(0, 6)}…{agent.evmAddress.slice(-4)}
+                </a>
+                <button
+                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); copy(agent.evmAddress, 'evm'); }}
+                  className="text-muted-foreground/40 hover:text-foreground transition-colors"
+                >
+                  {copied === 'evm' ? <CheckCircle2 size={9} className="text-emerald-400" /> : <Copy size={9} />}
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>

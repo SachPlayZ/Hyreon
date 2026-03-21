@@ -1,6 +1,77 @@
 import { ChatGroq } from '@langchain/groq';
 import { z } from 'zod';
 import { config } from '../config';
+import { getPrismaClient } from '@repo/database';
+
+const prisma = getPrismaClient();
+
+// ── Intent detection: is this a task request or just conversation? ──
+
+export type UserIntent = 'task' | 'conversation';
+
+export async function detectIntent(userMessage: string): Promise<UserIntent> {
+  const llm = new ChatGroq({
+    model: 'llama-3.3-70b-versatile',
+    apiKey: config.groq.apiKey,
+  });
+
+  // Fetch available agent names/descriptions so the LLM knows what tasks are possible
+  const agents = await prisma.agent.findMany({
+    where: { type: 'WORKER', status: 'active' },
+    select: { name: true, taskName: true, description: true },
+  });
+  const agentList = agents.length > 0
+    ? agents.map((a) => `- ${a.name}: ${a.taskName ?? a.description ?? 'general task'}`).join('\n')
+    : '(no agents currently available)';
+
+  const response = await llm.invoke([
+    {
+      role: 'system',
+      content:
+        'You determine whether a user message is a TASK REQUEST (wanting to hire an AI agent to do work) or CONVERSATION (greeting, question about the platform, small talk, etc.).\n\n' +
+        `Available agents on this platform:\n${agentList}\n\n` +
+        'Respond with ONLY one word: "task" or "conversation".\n' +
+        'Examples of TASK: "Summarize this article...", "Write me a blog post about...", "Generate a logo for...", "I need help writing..."\n' +
+        'Examples of CONVERSATION: "Hi", "Hello", "What can you do?", "How does this work?", "Thanks", "Who are you?", "What agents are available?"',
+    },
+    { role: 'user', content: userMessage },
+  ]);
+
+  const answer = (response.content as string).trim().toLowerCase();
+  return answer.includes('task') ? 'task' : 'conversation';
+}
+
+export async function generateConversationalReply(userMessage: string): Promise<string> {
+  const llm = new ChatGroq({
+    model: 'llama-3.3-70b-versatile',
+    apiKey: config.groq.apiKey,
+  });
+
+  const agents = await prisma.agent.findMany({
+    where: { type: 'WORKER', status: 'active' },
+    select: { name: true, taskName: true, description: true, rateHbar: true },
+  });
+  const agentList = agents.length > 0
+    ? agents.map((a) => `- **${a.name}**: ${a.taskName ?? a.description ?? 'general task'} (${a.rateHbar} ℏ)`).join('\n')
+    : 'No agents are currently registered.';
+
+  const response = await llm.invoke([
+    {
+      role: 'system',
+      content:
+        'You are the Hyreon Dispatcher, an AI assistant on a decentralized agent marketplace powered by Hedera. ' +
+        'Users can hire AI agents to complete tasks like summarization, content generation, and more. ' +
+        'You respond in a friendly, concise way. Use markdown for formatting when helpful.\n\n' +
+        `Available agents:\n${agentList}\n\n` +
+        'If the user asks what you can do or what agents are available, describe the agents listed above. ' +
+        'If they greet you, greet them back warmly and briefly explain what the platform does. ' +
+        'Keep responses short (2-4 sentences max). Do not make up capabilities that are not listed.',
+    },
+    { role: 'user', content: userMessage },
+  ]);
+
+  return response.content as string;
+}
 
 const ClassificationSchema = z.object({
   type: z.enum(['summarization', 'content_generation']),

@@ -103,6 +103,7 @@ model Agent {
   type             AgentType
   capability       String?
   accountId        String?   @map("account_id")
+  evmAddress       String?   @map("evm_address")
   inboundTopicId   String?   @map("inbound_topic_id")
   outboundTopicId  String?   @map("outbound_topic_id")
   profileTopicId   String?   @map("profile_topic_id")

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getPrismaClient } from '@repo/database';
 import { getTopicMessage, getTransaction, getHashScanTxUrl, getHashScanTopicUrl } from '../../hedera/mirror';
 import { DispatcherAgent } from '../../dispatcher';
+import { detectIntent, generateConversationalReply } from '../../dispatcher/classifier';
 
 const prisma = getPrismaClient();
 
@@ -22,7 +23,32 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
     }
   });
 
-  // POST /api/tasks — create quote
+  // POST /api/tasks/chat — smart entry point: detects intent and either creates a quote or responds conversationally
+  router.post('/chat', async (req, res) => {
+    try {
+      const { userId, message } = req.body as { userId: string; message: string };
+      if (!userId || !message) {
+        res.status(400).json({ error: 'userId and message are required' });
+        return;
+      }
+
+      const intent = await detectIntent(message);
+
+      if (intent === 'conversation') {
+        const reply = await generateConversationalReply(message);
+        res.json({ type: 'conversation', reply });
+        return;
+      }
+
+      // It's a task request — create a quote as before
+      const quote = await dispatcher.createQuote(userId, message);
+      res.json({ type: 'quote', ...quote });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST /api/tasks — create quote (legacy, still works)
   router.post('/', async (req, res) => {
     try {
       const { userId, message } = req.body as { userId: string; message: string };

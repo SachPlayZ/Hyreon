@@ -17,9 +17,25 @@ import {
   getPlatformEvmAddress,
 } from '../../hedera/accounts';
 import { encryptPrivateKey, decryptPrivateKey } from '../../hedera/keyEncryption';
+import { lookupEvmAddress } from '../../hedera/mirror';
 
 const prisma = getPrismaClient();
 const router = Router();
+
+// ── Helper: resolve EVM address for a user if missing ──
+async function resolveUserEvmAddress(user: any): Promise<any> {
+  if (user.evmAddress || !user.hederaAccountId) return user;
+  const evmAddr = await lookupEvmAddress(user.hederaAccountId);
+  if (evmAddr) {
+    // Fire-and-forget DB update
+    prisma.user.update({
+      where: { id: user.id },
+      data: { evmAddress: evmAddr },
+    }).catch(() => {});
+    user.evmAddress = evmAddr;
+  }
+  return user;
+}
 
 // GET /api/users/platform-config — public info about the platform (EVM address, network, chainId)
 router.get('/platform-config', (_req, res) => {
@@ -118,6 +134,7 @@ router.post('/auth/google', async (req, res) => {
     }
 
     // Never return the encrypted key to the client
+    await resolveUserEvmAddress(user);
     const { encryptedPrivateKey: _omit, ...safeUser } = user as any;
     res.json({ user: safeUser });
   } catch (err: any) {
@@ -200,6 +217,7 @@ router.post('/login-evm', async (req, res) => {
       }
     }
 
+    await resolveUserEvmAddress(user);
     res.json({ user });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

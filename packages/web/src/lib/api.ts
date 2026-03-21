@@ -88,6 +88,14 @@ export async function getUserTransactions(userId: string) {
 }
 
 // Tasks
+export async function sendChatMessage(userId: string, message: string) {
+  return apiFetch('/api/tasks/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, message }),
+  });
+}
+
 export async function createQuote(userId: string, message: string) {
   return apiFetch('/api/tasks', {
     method: 'POST',

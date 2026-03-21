@@ -52,7 +52,8 @@ export function AgentQuoteTable({ agents, userBalance, onHire, disabled }: Props
     <div className="space-y-2.5 my-1">
       <p className="text-xs text-muted-foreground font-medium">Choose an agent to execute your task:</p>
       {agents.map((agent) => {
-        const totalCost = agent.price_hbar * 1.05;
+        const totalCost = agent.price_hbar;
+        const platformFee = agent.price_hbar * 0.05;
         const canAfford = userBalance >= totalCost;
 
         return (
@@ -99,7 +100,7 @@ export function AgentQuoteTable({ agents, userBalance, onHire, disabled }: Props
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="font-bold text-foreground">{agent.price_hbar} <span className="text-muted-foreground font-normal text-xs">ℏ</span></p>
-                  <p className="text-muted-foreground/60 text-[10px] mt-0.5">+5% fee = {totalCost.toFixed(2)} ℏ</p>
+                  <p className="text-muted-foreground/60 text-[10px] mt-0.5">incl. {platformFee.toFixed(2)} ℏ fee</p>
                 </div>
               </div>
 

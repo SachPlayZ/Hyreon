@@ -247,11 +247,10 @@ export class DispatcherOrchestrator {
       if (!worker || !worker.accountId) throw new Error('Worker agent not found or missing accountId');
 
       const grossAmount = worker.rateHbar;
-      const totalCost = grossAmount * (1 + platformFeePercent);
 
-      if (user.hbarBalance < totalCost) {
+      if (user.hbarBalance < grossAmount) {
         throw new Error(
-          `Insufficient balance: need ${totalCost.toFixed(2)} HBAR, have ${user.hbarBalance.toFixed(2)} HBAR`
+          `Insufficient balance: need ${grossAmount.toFixed(2)} HBAR, have ${user.hbarBalance.toFixed(2)} HBAR`
         );
       }
 
@@ -275,7 +274,7 @@ export class DispatcherOrchestrator {
       await prisma.$transaction([
         prisma.user.update({
           where: { id: userId },
-          data: { hbarBalance: { decrement: totalCost }, hbarSpent: { increment: totalCost } },
+          data: { hbarBalance: { decrement: grossAmount }, hbarSpent: { increment: grossAmount } },
         }),
         // Record platform fee accrual — stays in operator account (treasury = operator)
         prisma.transaction.create({
@@ -452,7 +451,7 @@ export class DispatcherOrchestrator {
         Date.now() <= slaDeadline.getTime();
 
       if (!slaMet || !resultMessage || resultMessage.status === 'failed') {
-        const refundAmount = totalCost; // full amount including fee — fee never retained on failure
+        const refundAmount = grossAmount; // full amount including fee — fee never retained on failure
 
         await prisma.$transaction([
           // Restore full balance to user (including platform fee since task failed)

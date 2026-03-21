@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import {
   Star, Clock, Shield, BadgeCheck, ExternalLink, ArrowLeft,
-  Pencil, X, Check, TrendingUp, Globe, AlertCircle, Zap, Cpu, Link2,
+  Pencil, X, Check, TrendingUp, Globe, AlertCircle, Zap, Cpu, Link2, Copy, CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -43,6 +43,12 @@ export default function AgentDetailPage() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [copied, setCopied] = useState('');
+  const copyText = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(''), 2000);
+  };
 
   // Edit form state — mirrors registration fields
   const [form, setForm] = useState({
@@ -271,14 +277,35 @@ export default function AgentDetailPage() {
               {agent.rateHbar} ℏ / task
             </span>
             {agent.accountId && (
-              <a
-                href={`https://hashscan.io/testnet/account/${agent.accountId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors text-xs font-mono"
-              >
-                <ExternalLink size={10} /> {agent.accountId}
-              </a>
+              <div className="flex items-center gap-1.5">
+                <a
+                  href={`https://hashscan.io/testnet/account/${agent.accountId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-primary/60 hover:text-primary transition-colors text-xs font-mono"
+                >
+                  <ExternalLink size={10} /> {agent.accountId}
+                </a>
+                <button onClick={() => copyText(agent.accountId, 'acct')} className="text-muted-foreground/40 hover:text-foreground transition-colors">
+                  {copied === 'acct' ? <CheckCircle2 size={10} className="text-emerald-400" /> : <Copy size={10} />}
+                </button>
+              </div>
+            )}
+            {agent.evmAddress && (
+              <div className="flex items-center gap-1.5">
+                <a
+                  href={`https://hashscan.io/testnet/account/${agent.evmAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-primary/40 hover:text-primary transition-colors text-xs font-mono"
+                  title={agent.evmAddress}
+                >
+                  <ExternalLink size={10} /> {agent.evmAddress.slice(0, 6)}…{agent.evmAddress.slice(-4)}
+                </a>
+                <button onClick={() => copyText(agent.evmAddress, 'evm')} className="text-muted-foreground/40 hover:text-foreground transition-colors">
+                  {copied === 'evm' ? <CheckCircle2 size={10} className="text-emerald-400" /> : <Copy size={10} />}
+                </button>
+              </div>
             )}
           </div>
 

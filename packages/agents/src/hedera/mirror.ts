@@ -111,6 +111,21 @@ export async function getTransaction(txId: string): Promise<any> {
   return res.json();
 }
 
+/**
+ * Look up the EVM address for a Hedera account ID via Mirror Node.
+ * Returns the 0x-prefixed EVM address or null if not found.
+ */
+export async function lookupEvmAddress(accountId: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${MIRROR_BASE}/api/v1/accounts/${accountId}`);
+    if (!res.ok) return null;
+    const data = await res.json() as any;
+    return data.evm_address ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function getHashScanTxUrl(txId: string): string {
   return `https://hashscan.io/${HEDERA_NETWORK}/transaction/${txId}`;
 }

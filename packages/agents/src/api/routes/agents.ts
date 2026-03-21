@@ -11,9 +11,40 @@ import {
   verifyTopicExists,
   verifyAccountExists,
 } from '../../hcs10/connections';
+import { lookupEvmAddress } from '../../hedera/mirror';
 
 const prisma = getPrismaClient();
 const router = Router();
+
+// ── Helper: resolve EVM addresses for agents missing them ──
+async function resolveEvmAddresses(agents: any[]): Promise<any[]> {
+  const needsLookup = agents.filter((a) => a.accountId && !a.evmAddress);
+  if (needsLookup.length === 0) return agents;
+
+  // Look up in parallel (max 10 at a time to avoid rate limits)
+  const batches: any[][] = [];
+  for (let i = 0; i < needsLookup.length; i += 10) {
+    batches.push(needsLookup.slice(i, i + 10));
+  }
+
+  for (const batch of batches) {
+    await Promise.all(
+      batch.map(async (agent) => {
+        const evmAddr = await lookupEvmAddress(agent.accountId);
+        if (evmAddr) {
+          agent.evmAddress = evmAddr;
+          // Fire-and-forget DB update
+          prisma.agent.update({
+            where: { id: agent.id },
+            data: { evmAddress: evmAddr },
+          }).catch(() => {});
+        }
+      })
+    );
+  }
+
+  return agents;
+}
 
 const AGENT_REGISTRATION_DEPOSIT_HBAR = 10;
 
@@ -256,6 +287,7 @@ router.post('/register', async (req, res) => {
           type: 'WORKER',
           capability,
           accountId: agentAccountId,
+          evmAddress: user.evmAddress ?? null,
           inboundTopicId,
           outboundTopicId,
           profileTopicId,
@@ -315,6 +347,7 @@ router.post('/register', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const agents = await prisma.agent.findMany({ orderBy: { type: 'asc' } });
+    await resolveEvmAddresses(agents);
     res.json({ agents });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -332,6 +365,7 @@ router.get('/:id', async (req, res) => {
       res.status(404).json({ error: 'Agent not found' });
       return;
     }
+    await resolveEvmAddresses([agent]);
     res.json({ agent });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

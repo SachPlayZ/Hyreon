@@ -10,6 +10,7 @@ export interface AgentProfile {
   type: AgentType;
   capability?: string;
   accountId?: string;
+  evmAddress?: string;
   inboundTopicId?: string;
   outboundTopicId?: string;
   profileTopicId?: string;

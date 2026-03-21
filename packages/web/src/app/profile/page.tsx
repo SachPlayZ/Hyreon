@@ -327,7 +327,16 @@ export default function ProfilePage() {
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight">{user.name}</h1>
-            <p className="text-xs text-muted-foreground font-mono">{user.hederaAccountId}</p>
+            <button onClick={() => copyToClipboard(user.hederaAccountId, 'headerAcct')} className="flex items-center gap-1 text-xs text-muted-foreground font-mono hover:text-foreground transition-colors">
+              {user.hederaAccountId}
+              {copied === 'headerAcct' ? <CheckCircle2 size={10} className="text-emerald-400" /> : <Copy size={10} className="opacity-40" />}
+            </button>
+            {user.evmAddress && (
+              <button onClick={() => copyToClipboard(user.evmAddress!, 'headerEvm')} className="flex items-center gap-1 text-xs text-muted-foreground/70 font-mono hover:text-foreground transition-colors" title={user.evmAddress}>
+                {user.evmAddress.slice(0, 10)}…{user.evmAddress.slice(-6)}
+                {copied === 'headerEvm' ? <CheckCircle2 size={10} className="text-emerald-400" /> : <Copy size={10} className="opacity-40" />}
+              </button>
+            )}
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={logout} className="text-muted-foreground text-xs">
@@ -568,6 +577,7 @@ export default function ProfilePage() {
                 <>
                   <p className="text-xs text-muted-foreground">
                     The platform will transfer HBAR from your managed Hedera account ({user.hederaAccountId}) to the platform. You'll be asked to approve before anything moves.
+                    {user.evmAddress && <> (EVM: <span className="font-mono">{user.evmAddress.slice(0, 6)}…{user.evmAddress.slice(-4)}</span>)</>}
                   </p>
                   <Button
                     onClick={() => {
@@ -660,6 +670,9 @@ export default function ProfilePage() {
             <div className="flex-1 bg-muted/20 border border-border/40 rounded-lg px-3 py-2">
               <p className="text-xs text-muted-foreground">To</p>
               <p className="font-mono text-sm">{user.hederaAccountId}</p>
+              {user.evmAddress && (
+                <p className="font-mono text-xs text-muted-foreground/70 truncate" title={user.evmAddress}>{user.evmAddress}</p>
+              )}
             </div>
           </div>
           {withdrawError && (
@@ -777,16 +790,27 @@ export default function ProfilePage() {
       <div className="bg-muted/10 border border-border/30 rounded-xl p-4 space-y-2">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Account Info</p>
         {[
-          { label: 'User ID', value: user.id.slice(0, 16) + '…' },
-          { label: 'Hedera Account', value: user.hederaAccountId },
-          { label: 'Network', value: 'Hedera Testnet' },
-        ].map(({ label, value }) => (
+          { label: 'User ID', value: user.id.slice(0, 16) + '…', copyKey: '', full: '' },
+          { label: 'Hedera Account', value: user.hederaAccountId, copyKey: 'footerAcct', full: user.hederaAccountId },
+          ...(user.evmAddress ? [{ label: 'EVM Address', value: user.evmAddress, copyKey: 'footerEvm', full: user.evmAddress }] : []),
+          { label: 'Network', value: 'Hedera Testnet', copyKey: '', full: '' },
+        ].map(({ label, value, copyKey, full }) => (
           <div key={label} className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground text-xs">{label}</span>
-            <span className="font-mono text-xs">{value}</span>
+            {copyKey ? (
+              <button
+                onClick={() => copyToClipboard(full, copyKey)}
+                className="flex items-center gap-1 font-mono text-xs hover:text-foreground transition-colors"
+              >
+                {value}
+                {copied === copyKey ? <CheckCircle2 size={10} className="text-emerald-400" /> : <Copy size={10} className="opacity-40" />}
+              </button>
+            ) : (
+              <span className="font-mono text-xs">{value}</span>
+            )}
           </div>
         ))}
-        <div className="pt-1">
+        <div className="pt-1 space-y-1">
           <a
             href={`https://hashscan.io/testnet/account/${user.hederaAccountId}`}
             target="_blank"
@@ -795,6 +819,16 @@ export default function ProfilePage() {
           >
             <ExternalLink size={11} /> View on HashScan
           </a>
+          {user.evmAddress && (
+            <a
+              href={`https://hashscan.io/testnet/account/${user.evmAddress}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-xs text-primary/60 hover:text-primary hover:underline"
+            >
+              <ExternalLink size={11} /> View EVM on HashScan
+            </a>
+          )}
         </div>
       </div>
 
