@@ -153,7 +153,7 @@ export function useChat(opts?: UseChatOpts) {
         setPhase('awaiting_selection');
         setPendingTaskId(taskId);
         setIsReadOnly(false);
-      } else if (task.status === 'RATING_WINDOW') {
+      } else if (task.status === 'RATING_WINDOW' && !task.userRating && !(task.ratings?.length > 0)) {
         setPhase('rating_window');
         setPendingTaskId(taskId);
         setIsReadOnly(false);
