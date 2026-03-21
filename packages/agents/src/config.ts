@@ -68,6 +68,6 @@ export const config = {
     rating: optional('RATING_TOPIC_ID'),
   },
   api: {
-    port: parseInt(optional('API_PORT', '3001')),
+    port: parseInt(optional('PORT', '') || optional('API_PORT', '3001')),
   },
 };
