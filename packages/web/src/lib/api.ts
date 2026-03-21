@@ -136,6 +136,14 @@ export async function rateTask(taskId: string, userId: string, stars: number, co
   });
 }
 
+export async function skipRating(taskId: string, userId: string) {
+  return apiFetch(`/api/tasks/${taskId}/skip-rating`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId }),
+  });
+}
+
 // Agents
 export async function getAgents() {
   return apiFetch('/api/agents');

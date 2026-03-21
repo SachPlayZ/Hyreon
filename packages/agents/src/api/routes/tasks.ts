@@ -225,5 +225,26 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
     }
   });
 
+  // POST /api/tasks/:id/skip-rating — mark rating as skipped so it doesn't reappear
+  router.post('/:id/skip-rating', async (req, res) => {
+    try {
+      const { userId } = req.body as { userId: string };
+      if (!userId) {
+        res.status(400).json({ error: 'userId is required' });
+        return;
+      }
+      const task = await prisma.task.findUnique({ where: { id: req.params.id } });
+      if (!task) { res.status(404).json({ error: 'Task not found' }); return; }
+      if (task.userId !== userId) { res.status(403).json({ error: 'Unauthorized' }); return; }
+      await prisma.task.update({
+        where: { id: req.params.id },
+        data: { userRating: 0 },
+      });
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   return router;
 }

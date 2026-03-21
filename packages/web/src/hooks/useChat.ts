@@ -1,6 +1,6 @@
 'use client';
 import { useState, useCallback, useRef } from 'react';
-import { sendChatMessage, createQuote, confirmTask, rateTask, provideTaskInputs, getTask } from '@/lib/api';
+import { sendChatMessage, createQuote, confirmTask, rateTask, skipRating as skipRatingApi, provideTaskInputs, getTask } from '@/lib/api';
 import { useUser } from '@/contexts/UserContext';
 
 export type ChatPhase =
@@ -153,7 +153,7 @@ export function useChat(opts?: UseChatOpts) {
         setPhase('awaiting_selection');
         setPendingTaskId(taskId);
         setIsReadOnly(false);
-      } else if (task.status === 'RATING_WINDOW' && !task.userRating && !(task.ratings?.length > 0)) {
+      } else if (task.status === 'RATING_WINDOW' && task.userRating == null && !(task.ratings?.length > 0)) {
         setPhase('rating_window');
         setPendingTaskId(taskId);
         setIsReadOnly(false);
@@ -414,10 +414,13 @@ export function useChat(opts?: UseChatOpts) {
     [user]
   );
 
-  const skipRating = useCallback(() => {
+  const skipRating = useCallback(async () => {
+    if (user && pendingTaskId) {
+      try { await skipRatingApi(pendingTaskId, user.id); } catch {}
+    }
     setPhase('done');
     setPendingTaskId(null);
-  }, []);
+  }, [user, pendingTaskId]);
 
   return {
     messages,
