@@ -500,77 +500,77 @@ export default function RegisterAgentPage() {
               </p>
             </div>
 
-            {/* API-specific sections */}
-            {protocol === 'api' && (
-              <>
-                <Separator className="opacity-30" />
+            {/* Request/Response schema — optional for all protocols.
+               When provided, the dispatcher translates natural language ↔ JSON.
+               When omitted, tasks use plain natural language passthrough. */}
+            <Separator className="opacity-30" />
 
-                {/* Example Request Body */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="exampleRequestBody">Example Request Body (JSON)</Label>
-                  <Textarea
-                    id="exampleRequestBody"
-                    name="exampleRequestBody"
-                    value={form.exampleRequestBody}
-                    onChange={handleChange}
-                    placeholder={'{\n  "text": "...",\n  "language": "en",\n  "maxWords": 500\n}'}
-                    rows={5}
-                    className="resize-none text-sm font-mono"
-                  />
-                  {requestJsonError && (
-                    <p className="text-xs text-destructive">{requestJsonError}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    The dispatcher will ask users for these fields before sending to your API.
-                  </p>
+            {/* Example Request Body */}
+            <div className="space-y-1.5">
+              <Label htmlFor="exampleRequestBody">Example Request Body (JSON) <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Textarea
+                id="exampleRequestBody"
+                name="exampleRequestBody"
+                value={form.exampleRequestBody}
+                onChange={handleChange}
+                placeholder={'{\n  "text": "...",\n  "language": "en",\n  "maxWords": 500\n}'}
+                rows={5}
+                className="resize-none text-sm font-mono"
+              />
+              {requestJsonError && (
+                <p className="text-xs text-destructive">{requestJsonError}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {protocol === 'api'
+                  ? "The dispatcher will ask users for these fields before sending to your API."
+                  : "The dispatcher will ask users for these fields before sending the task to your agent."}
+              </p>
 
-                  {/* Field required checkboxes */}
-                  {requestFields.length > 0 && (
-                    <div className="bg-muted/30 border border-border/40 rounded-lg p-3 space-y-2">
-                      <p className="text-xs text-muted-foreground font-medium">Mark required fields:</p>
-                      {requestFields.map((field) => (
-                        <label key={field} className="flex items-center gap-2 text-sm cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={requestFieldsConfig[field]?.required ?? true}
-                            onChange={() => toggleRequired(field)}
-                            className="rounded border-border"
-                          />
-                          <span className="font-mono text-xs">{field}</span>
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                            requestFieldsConfig[field]?.required !== false
-                              ? 'bg-primary/10 text-primary'
-                              : 'bg-muted text-muted-foreground'
-                          }`}>
-                            {requestFieldsConfig[field]?.required !== false ? 'required' : 'optional'}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
+              {/* Field required checkboxes */}
+              {requestFields.length > 0 && (
+                <div className="bg-muted/30 border border-border/40 rounded-lg p-3 space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium">Mark required fields:</p>
+                  {requestFields.map((field) => (
+                    <label key={field} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={requestFieldsConfig[field]?.required ?? true}
+                        onChange={() => toggleRequired(field)}
+                        className="rounded border-border"
+                      />
+                      <span className="font-mono text-xs">{field}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        requestFieldsConfig[field]?.required !== false
+                          ? 'bg-primary/10 text-primary'
+                          : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {requestFieldsConfig[field]?.required !== false ? 'required' : 'optional'}
+                      </span>
+                    </label>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Example Response Body */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="exampleResponseBody">Example Response Body (JSON)</Label>
-                  <Textarea
-                    id="exampleResponseBody"
-                    name="exampleResponseBody"
-                    value={form.exampleResponseBody}
-                    onChange={handleChange}
-                    placeholder={'{\n  "summary": "...",\n  "wordCount": 42\n}'}
-                    rows={4}
-                    className="resize-none text-sm font-mono"
-                  />
-                  {responseJsonError && (
-                    <p className="text-xs text-destructive">{responseJsonError}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Helps the dispatcher format your agent&apos;s response as natural language for users.
-                  </p>
-                </div>
-              </>
-            )}
+            {/* Example Response Body */}
+            <div className="space-y-1.5">
+              <Label htmlFor="exampleResponseBody">Example Response Body (JSON) <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Textarea
+                id="exampleResponseBody"
+                name="exampleResponseBody"
+                value={form.exampleResponseBody}
+                onChange={handleChange}
+                placeholder={'{\n  "summary": "...",\n  "wordCount": 42\n}'}
+                rows={4}
+                className="resize-none text-sm font-mono"
+              />
+              {responseJsonError && (
+                <p className="text-xs text-destructive">{responseJsonError}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Helps the dispatcher format your agent&apos;s response as natural language for users.
+              </p>
+            </div>
 
             <Separator className="opacity-30" />
 
