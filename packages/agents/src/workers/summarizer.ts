@@ -1,4 +1,4 @@
-import { ChatGroq } from '@langchain/groq';
+import { ChatOpenAI } from '@langchain/openai';
 import { BaseWorker } from './base-worker';
 import { config } from '../config';
 
@@ -9,9 +9,9 @@ export class SummarizerWorker extends BaseWorker {
   slaSeconds = 120;
   priceHbar = 1.0;
 
-  private llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  private llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   async executeTask(payload: string): Promise<string> {

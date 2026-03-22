@@ -1,4 +1,4 @@
-import { ChatGroq } from '@langchain/groq';
+import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod';
 import { config } from '../config';
 import { getPrismaClient } from '@repo/database';
@@ -10,9 +10,9 @@ const prisma = getPrismaClient();
 export type UserIntent = 'task' | 'conversation';
 
 export async function detectIntent(userMessage: string): Promise<UserIntent> {
-  const llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  const llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   // Fetch available agent names/descriptions so the LLM knows what tasks are possible
@@ -42,9 +42,9 @@ export async function detectIntent(userMessage: string): Promise<UserIntent> {
 }
 
 export async function generateConversationalReply(userMessage: string): Promise<string> {
-  const llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  const llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   const agents = await prisma.agent.findMany({
@@ -83,9 +83,9 @@ export type Classification = z.infer<typeof ClassificationSchema>;
 
 // Legacy classifier for platform agents (summarization / content_generation)
 export async function classifyTask(userMessage: string): Promise<Classification> {
-  const llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  const llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   const response = await llm.invoke([
@@ -117,9 +117,9 @@ export async function matchAgents(
 ): Promise<AgentMatch[]> {
   if (agents.length === 0) return [];
 
-  const llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  const llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   const agentList = agents
@@ -155,9 +155,9 @@ export async function extractFieldsFromMessage(
   exampleRequestBody: any,
   requestFieldsConfig: Record<string, { required: boolean }>
 ): Promise<{ extracted: any; missing: string[] }> {
-  const llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  const llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   const fields = Object.entries(requestFieldsConfig)
@@ -193,9 +193,9 @@ export async function formatResponseForUser(
   exampleResponseBody: any | null,
   agentName: string
 ): Promise<string> {
-  const llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  const llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   const response = await llm.invoke([
@@ -226,9 +226,9 @@ export async function generateInputQuestion(
   agentName: string,
   agentDescription: string | null
 ): Promise<string> {
-  const llm = new ChatGroq({
-    model: 'llama-3.3-70b-versatile',
-    apiKey: config.groq.apiKey,
+  const llm = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: config.openai.apiKey,
   });
 
   const required = Object.entries(requestFieldsConfig).filter(([, v]) => v.required).map(([k]) => k);

@@ -37,8 +37,8 @@ export const config = {
     operatorId: required('HEDERA_OPERATOR_ID'),
     operatorKey: required('HEDERA_OPERATOR_KEY'),
   },
-  groq: {
-    apiKey: required('GROQ_API_KEY'),
+  openai: {
+    apiKey: required('OPENAI_API_KEY'),
   },
   agents: {
     dispatcher: {

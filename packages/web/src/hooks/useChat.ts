@@ -267,13 +267,28 @@ export function useChat(opts?: UseChatOpts) {
       setMessages((prev) => [...prev, userMsg]);
       setIsLoading(true);
 
-      // Auto-hire flow: skip quote table, directly hire the preselected agent
+      // Auto-hire flow: detect intent first, only hire if it's a task request
       if (opts?.preselectedAgentId && !autoHiredRef.current && phase === 'idle') {
         autoHiredRef.current = true;
-        setPhase('executing');
         try {
-          const quoteResult = await createQuote(user.id, content);
-          const taskId = quoteResult.taskId;
+          // First check if the message is actually a task request
+          const chatResult = await sendChatMessage(user.id, content);
+
+          if (chatResult.type === 'conversation') {
+            // Not a task — just reply conversationally
+            setMessages((prev) => [
+              ...prev,
+              { id: `dispatcher-${Date.now()}`, role: 'dispatcher', content: chatResult.reply },
+            ]);
+            setPhase('idle');
+            autoHiredRef.current = false; // allow re-try with a real task
+            setIsLoading(false);
+            return;
+          }
+
+          // It's a task — proceed with auto-hire
+          setPhase('executing');
+          const taskId = chatResult.taskId;
           setActiveTaskId(taskId);
 
           const progressId = `progress-${taskId}`;
