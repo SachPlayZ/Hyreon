@@ -446,10 +446,19 @@ export class DispatcherOrchestrator {
               lastSequence = Math.max(lastSequence, msg.sequence);
               if (msg.data?.type === 'task_result' && msg.data?.taskId === taskId) {
                 // Fetch result from DB — worker stored it there to keep HCS message small
-                const updatedTask = await prisma.task.findUnique({ where: { id: taskId } });
+                // Retry a few times in case the DB write hasn't committed yet
+                let resultText: string | null = null;
+                for (let attempt = 0; attempt < 3; attempt++) {
+                  const updatedTask = await prisma.task.findUnique({ where: { id: taskId } });
+                  if (updatedTask?.resultText) {
+                    resultText = updatedTask.resultText;
+                    break;
+                  }
+                  if (attempt < 2) await new Promise((r) => setTimeout(r, 1000));
+                }
                 resultMessage = {
                   ...msg.data,
-                  result: updatedTask?.resultText ?? msg.data.result ?? '',
+                  result: resultText ?? msg.data.result ?? '',
                 };
                 break;
               }

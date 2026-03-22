@@ -18,6 +18,8 @@ import {
 } from '../../hedera/accounts';
 import { encryptPrivateKey, decryptPrivateKey } from '../../hedera/keyEncryption';
 import { lookupEvmAddress } from '../../hedera/mirror';
+import { signToken, requireAuth, requireOwner, markSignatureUsed } from '../middleware/auth';
+import { authLimiter } from '../middleware/rateLimit';
 
 const prisma = getPrismaClient();
 const router: Router = Router();
@@ -58,7 +60,7 @@ router.get('/platform-config', (_req, res) => {
 
 // POST /api/users/auth/google
 // Exchange Google authorization code for tokens (auth code flow), then find or create user.
-router.post('/auth/google', async (req, res) => {
+router.post('/auth/google', authLimiter, async (req, res) => {
   try {
     const { code, name } = req.body as { code: string; name?: string };
     if (!code) {
@@ -136,7 +138,8 @@ router.post('/auth/google', async (req, res) => {
     // Never return the encrypted key to the client
     await resolveUserEvmAddress(user);
     const { encryptedPrivateKey: _omit, ...safeUser } = user as any;
-    res.json({ user: safeUser });
+    const token = signToken({ userId: user.id, authProvider: 'GOOGLE' });
+    res.json({ user: safeUser, token });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -145,7 +148,7 @@ router.post('/auth/google', async (req, res) => {
 // POST /api/users/login-evm
 // Verify MetaMask signature → find or create user linked to their EVM address
 // If new user, `name` is required.
-router.post('/login-evm', async (req, res) => {
+router.post('/login-evm', authLimiter, async (req, res) => {
   try {
     const { address, signature, timestamp, name } = req.body as {
       address: string;
@@ -162,6 +165,12 @@ router.post('/login-evm', async (req, res) => {
     // Reject signatures older than 5 minutes
     if (Date.now() - timestamp > 5 * 60 * 1000) {
       res.status(400).json({ error: 'Signature expired — please sign again' });
+      return;
+    }
+
+    // Prevent signature replay within the 5-minute window
+    if (!markSignatureUsed(signature)) {
+      res.status(400).json({ error: 'Signature already used — please sign again' });
       return;
     }
 
@@ -218,14 +227,15 @@ router.post('/login-evm', async (req, res) => {
     }
 
     await resolveUserEvmAddress(user);
-    res.json({ user });
+    const token = signToken({ userId: user.id, authProvider: 'METAMASK' });
+    res.json({ user, token });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // GET /api/users/:id/balance — platform balance (DB)
-router.get('/:id/balance', async (req, res) => {
+router.get('/:id/balance', requireAuth, requireOwner, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
@@ -241,7 +251,7 @@ router.get('/:id/balance', async (req, res) => {
 });
 
 // GET /api/users/:id/wallet-balance — real on-chain balance from Mirror Node
-router.get('/:id/wallet-balance', async (req, res) => {
+router.get('/:id/wallet-balance', requireAuth, requireOwner, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
@@ -255,7 +265,7 @@ router.get('/:id/wallet-balance', async (req, res) => {
 
 // POST /api/users/:id/deposit/initiate
 // Returns platform account ID + unique memo so user can send real HBAR from their wallet
-router.post('/:id/deposit/initiate', async (req, res) => {
+router.post('/:id/deposit/initiate', requireAuth, requireOwner, async (req, res) => {
   try {
     const { amount } = req.body as { amount: number };
     if (!amount || amount <= 0) {
@@ -297,7 +307,7 @@ router.post('/:id/deposit/initiate', async (req, res) => {
 
 // POST /api/users/:id/deposit/verify
 // Polls Mirror Node to confirm the on-chain transfer, then credits DB balance
-router.post('/:id/deposit/verify', async (req, res) => {
+router.post('/:id/deposit/verify', requireAuth, requireOwner, async (req, res) => {
   try {
     const { transactionId } = req.body as { transactionId: string };
     if (!transactionId) {
@@ -369,7 +379,7 @@ router.post('/:id/deposit/verify', async (req, res) => {
 
 // POST /api/users/:id/deposit/confirm-evm
 // MetaMask users: verify the EVM tx and credit balance
-router.post('/:id/deposit/confirm-evm', async (req, res) => {
+router.post('/:id/deposit/confirm-evm', requireAuth, requireOwner, async (req, res) => {
   try {
     const { txHash, amount, senderEvmAddress } = req.body as {
       txHash: string;
@@ -442,7 +452,7 @@ router.post('/:id/deposit/confirm-evm', async (req, res) => {
 // POST /api/users/:id/deposit/google
 // Google auth users: platform uses stored encrypted key to transfer from their account to operator.
 // Requires explicit { amount, confirmed: true } — the frontend must show a confirmation dialog first.
-router.post('/:id/deposit/google', async (req, res) => {
+router.post('/:id/deposit/google', requireAuth, requireOwner, async (req, res) => {
   try {
     const { amount, confirmed } = req.body as { amount: number; confirmed: boolean };
 
@@ -515,7 +525,7 @@ router.post('/:id/deposit/google', async (req, res) => {
 
 // POST /api/users/:id/withdraw
 // Platform sends real HBAR from operator account → user's hederaAccountId on-chain
-router.post('/:id/withdraw', async (req, res) => {
+router.post('/:id/withdraw', requireAuth, requireOwner, async (req, res) => {
   try {
     const { amount } = req.body as { amount: number };
     if (!amount || amount <= 0) {
@@ -583,7 +593,7 @@ router.post('/:id/withdraw', async (req, res) => {
 });
 
 // GET /api/users/:id/transactions — deposit/withdraw history
-router.get('/:id/transactions', async (req, res) => {
+router.get('/:id/transactions', requireAuth, requireOwner, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }

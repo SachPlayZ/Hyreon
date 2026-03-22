@@ -3,6 +3,7 @@ import { getPrismaClient } from '@repo/database';
 import { getTopicMessage, getTransaction, getHashScanTxUrl, getHashScanTopicUrl } from '../../hedera/mirror';
 import { DispatcherAgent } from '../../dispatcher';
 import { detectIntent, generateConversationalReply } from '../../dispatcher/classifier';
+import { requireAuth } from '../middleware/auth';
 
 const prisma = getPrismaClient();
 
@@ -24,7 +25,7 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
   });
 
   // POST /api/tasks/chat — smart entry point: detects intent and either creates a quote or responds conversationally
-  router.post('/chat', async (req, res) => {
+  router.post('/chat', requireAuth, async (req, res) => {
     try {
       const { userId, message } = req.body as { userId: string; message: string };
       if (!userId || !message) {
@@ -49,7 +50,7 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
   });
 
   // POST /api/tasks — create quote (legacy, still works)
-  router.post('/', async (req, res) => {
+  router.post('/', requireAuth, async (req, res) => {
     try {
       const { userId, message } = req.body as { userId: string; message: string };
       if (!userId || !message) {
@@ -64,7 +65,7 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
   });
 
   // POST /api/tasks/:id/confirm — confirm and execute
-  router.post('/:id/confirm', async (req, res) => {
+  router.post('/:id/confirm', requireAuth, async (req, res) => {
     try {
       const { userId, agentId } = req.body as { userId: string; agentId: string };
       if (!userId || !agentId) {
@@ -79,7 +80,7 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
   });
 
   // POST /api/tasks/:id/provide-inputs — user provides inputs for third-party agent
-  router.post('/:id/provide-inputs', async (req, res) => {
+  router.post('/:id/provide-inputs', requireAuth, async (req, res) => {
     try {
       const { userId, message } = req.body as { userId: string; message: string };
       if (!userId || !message) {
@@ -203,7 +204,7 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
   });
 
   // POST /api/tasks/:id/rate
-  router.post('/:id/rate', async (req, res) => {
+  router.post('/:id/rate', requireAuth, async (req, res) => {
     try {
       const { userId, stars, comment } = req.body as {
         userId: string;
@@ -226,7 +227,7 @@ export function createTasksRouter(dispatcher: DispatcherAgent): Router {
   });
 
   // POST /api/tasks/:id/skip-rating — mark rating as skipped so it doesn't reappear
-  router.post('/:id/skip-rating', async (req, res) => {
+  router.post('/:id/skip-rating', requireAuth, async (req, res) => {
     try {
       const { userId } = req.body as { userId: string };
       if (!userId) {

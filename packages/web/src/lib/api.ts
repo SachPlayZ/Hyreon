@@ -1,7 +1,18 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
+let _authToken: string | null = null;
+
+/** Called by UserContext to set/clear the current auth token */
+export function setAuthToken(token: string | null) {
+  _authToken = token;
+}
+
 async function apiFetch(path: string, init?: RequestInit) {
-  const res = await fetch(`${API_BASE}${path}`, init);
+  const headers = new Headers(init?.headers);
+  if (_authToken) {
+    headers.set('Authorization', `Bearer ${_authToken}`);
+  }
+  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

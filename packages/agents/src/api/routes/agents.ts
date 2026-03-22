@@ -4,6 +4,7 @@ import { getPrismaClient } from '@repo/database';
 import { buildReputationBreakdown } from '../../dispatcher/reputation';
 import { registerAgent } from '../../hcs10/setup';
 import { createHCS10Client } from '../../hcs10/setup';
+import { requireAuth } from '../middleware/auth';
 import {
   ensureConnectionBetween,
   initiateHCS10Handshake,
@@ -73,7 +74,7 @@ async function getDispatcherAccountId(): Promise<string | null> {
 
 // POST /api/agents/register — third-party agent registration
 // Supports three protocols: 'api' (default), 'hcs10_managed', 'hcs10_self'
-router.post('/register', async (req, res) => {
+router.post('/register', requireAuth, async (req, res) => {
   try {
     const {
       agentName, apiUrl, taskType, priceHbar, slaSeconds, description, userId,
@@ -540,7 +541,7 @@ router.post('/:agentId/tasks/:taskId/result', async (req, res) => {
 });
 
 // PATCH /api/agents/:id — update agent details (owner only)
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', requireAuth, async (req, res) => {
   try {
     const { userId, agentName, apiUrl, priceHbar, slaSeconds, description,
       exampleRequestBody, requestFieldsConfig, exampleResponseBody, taskType } = req.body as {

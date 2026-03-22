@@ -41,7 +41,7 @@ export default function LoginPage() {
       setError('');
       try {
         const data = await loginGoogle(codeResponse.code);
-        setUser(data.user);
+        setUser(data.user, data.token);
         router.push('/chat');
       } catch (err: any) {
         setError(err.message ?? 'Google login failed');
@@ -78,7 +78,7 @@ export default function LoginPage() {
       // Try logging in — if user is new, backend returns { error, newUser: true }
       try {
         const data = await loginEvm({ address, signature, timestamp });
-        setUser(data.user);
+        setUser(data.user, data.token);
         router.push('/chat');
       } catch (err: any) {
         const parsed = tryParseError(err.message);
@@ -105,7 +105,7 @@ export default function LoginPage() {
     setError('');
     try {
       const data = await loginEvm({ ...pendingLogin, name: username.trim() });
-      setUser(data.user);
+      setUser(data.user, data.token);
       router.push('/chat');
     } catch (err: any) {
       setError(err.message ?? 'Login failed');
