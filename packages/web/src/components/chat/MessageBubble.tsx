@@ -42,12 +42,12 @@ export function MessageBubble({ role, content, verification, timestamp }: Props)
           className={cn(
             'rounded-2xl px-4 py-2.5 text-sm leading-relaxed prose prose-sm prose-invert max-w-none',
             'prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5',
-            'prose-a:text-primary prose-a:underline prose-a:underline-offset-2 hover:prose-a:opacity-80',
+            'prose-a:text-blue-400 prose-a:underline prose-a:underline-offset-2 prose-a:font-medium hover:prose-a:text-blue-300',
             'prose-strong:text-foreground prose-headings:text-foreground',
             'prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs',
             'prose-pre:bg-card/80 prose-pre:border prose-pre:border-border/40 prose-pre:rounded-lg',
             isUser
-              ? 'bg-primary text-primary-foreground rounded-tr-sm prose-invert prose-a:text-primary-foreground'
+              ? 'bg-primary text-primary-foreground rounded-tr-sm prose-invert prose-a:!text-blue-200 hover:prose-a:!text-blue-100'
               : isSystem
               ? 'bg-destructive/10 text-destructive border border-destructive/20 rounded-tl-sm'
               : 'bg-card border border-border/60 text-foreground rounded-tl-sm'
