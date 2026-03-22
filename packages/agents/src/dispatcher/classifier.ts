@@ -11,7 +11,7 @@ export type UserIntent = 'task' | 'conversation';
 
 export async function detectIntent(userMessage: string): Promise<UserIntent> {
   const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 
@@ -43,7 +43,7 @@ export async function detectIntent(userMessage: string): Promise<UserIntent> {
 
 export async function generateConversationalReply(userMessage: string): Promise<string> {
   const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 
@@ -84,7 +84,7 @@ export type Classification = z.infer<typeof ClassificationSchema>;
 // Legacy classifier for platform agents (summarization / content_generation)
 export async function classifyTask(userMessage: string): Promise<Classification> {
   const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 
@@ -118,7 +118,7 @@ export async function matchAgents(
   if (agents.length === 0) return [];
 
   const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 
@@ -156,7 +156,7 @@ export async function extractFieldsFromMessage(
   requestFieldsConfig: Record<string, { required: boolean }>
 ): Promise<{ extracted: any; missing: string[] }> {
   const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 
@@ -194,7 +194,7 @@ export async function formatResponseForUser(
   agentName: string
 ): Promise<string> {
   const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 
@@ -227,7 +227,7 @@ export async function generateInputQuestion(
   agentDescription: string | null
 ): Promise<string> {
   const llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 

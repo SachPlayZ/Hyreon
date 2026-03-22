@@ -10,7 +10,7 @@ export class SummarizerWorker extends BaseWorker {
   priceHbar = 1.0;
 
   private llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 

@@ -10,7 +10,7 @@ export class ContentGenWorker extends BaseWorker {
   priceHbar = 2.0;
 
   private llm = new ChatOpenAI({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     apiKey: config.openai.apiKey,
   });
 
