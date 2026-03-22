@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/chat', label: 'Chat' },
   { href: '/agents', label: 'Agents' },
   { href: '/agents/register', label: 'Register Agent' },
+  { href: '/docs', label: 'Docs' },
 ];
 
 export function Header() {
