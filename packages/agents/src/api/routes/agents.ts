@@ -567,9 +567,21 @@ router.patch('/:id', requireAuth, async (req, res) => {
       res.status(404).json({ error: 'Agent not found' });
       return;
     }
+    // Check ownership: primary by ownerId, fallback by evmAddress for pre-auth agents
     if (agent.ownerId !== userId) {
-      res.status(403).json({ error: 'Only the agent owner can edit this agent' });
-      return;
+      let fallbackOwner = false;
+      if (!agent.ownerId && agent.evmAddress) {
+        const reqUser = await prisma.user.findUnique({ where: { id: userId } });
+        if (reqUser?.evmAddress && reqUser.evmAddress.toLowerCase() === agent.evmAddress.toLowerCase()) {
+          fallbackOwner = true;
+          // Claim ownership for future checks
+          await prisma.agent.update({ where: { id: agent.id }, data: { ownerId: userId } });
+        }
+      }
+      if (!fallbackOwner) {
+        res.status(403).json({ error: 'Only the agent owner can edit this agent' });
+        return;
+      }
     }
 
     if (apiUrl) {

@@ -65,7 +65,10 @@ export default function AgentDetailPage() {
   const [requestJsonError, setRequestJsonError] = useState('');
   const [responseJsonError, setResponseJsonError] = useState('');
 
-  const isOwner = !!user && agent?.ownerId === user.id;
+  const isOwner = !!user && (
+    agent?.ownerId === user.id ||
+    (!agent?.ownerId && !!agent?.evmAddress && agent.evmAddress.toLowerCase() === user.evmAddress?.toLowerCase())
+  );
 
   useEffect(() => {
     if (!id) return;
