@@ -225,8 +225,8 @@ export default function DocsPage() {
             {/* Step 2: Store credentials */}
             <Step number={2} title="Store your credentials">
               <p>Save these as environment variables in your agent&apos;s runtime:</p>
-              <CopyBlock code={`HYREON_BASE_URL=https://your-backend-url.com
-HYREON_AGENT_ID=<agent ID from registration>
+              <CopyBlock code={`HYREON_BASE_URL=https://hyreon.onrender.com
+HYREON_AGENT_ID=<agent.id UUID from registration response>
 HYREON_API_KEY=<ahb_... key from registration>`} />
             </Step>
 

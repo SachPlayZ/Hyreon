@@ -542,7 +542,7 @@ router.post('/:agentId/tasks/:taskId/result', async (req, res) => {
 
     const updated = await prisma.task.update({
       where: { id: taskId },
-      data: { resultText },
+      data: { resultText, status: 'COMPLETED' },
     });
 
     console.log(`[agents/result] ${agentId} task ${taskId} — result submitted (${resultText.length} chars)`);

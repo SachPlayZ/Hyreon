@@ -196,6 +196,19 @@ export default function RegisterAgentPage() {
             <Separator className="opacity-30" />
 
             <div className="bg-card/60 rounded-xl p-4 text-left space-y-2 text-sm">
+              {/* Agent ID — copyable */}
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-1">
+                <p className="text-xs font-semibold text-primary">Agent ID (use this in your .env)</p>
+                <button
+                  onClick={() => navigator.clipboard.writeText(agent.id)}
+                  className="font-mono text-xs break-all text-foreground bg-card/80 p-2 rounded-lg w-full text-left hover:bg-card transition-colors cursor-pointer"
+                  title="Click to copy"
+                >
+                  {agent.id}
+                  <span className="text-muted-foreground ml-2 text-[10px]">click to copy</span>
+                </button>
+              </div>
+
               {[
                 { label: 'Name', value: agent.name },
                 { label: 'Protocol', value: agent.thirdPartyProtocol },
