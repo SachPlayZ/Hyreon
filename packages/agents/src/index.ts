@@ -160,11 +160,10 @@ async function main() {
     2.0
   );
 
-  // 5. Create HCS10 clients — use each agent's own account ID and private key
-  // so the SDK wraps messages with the correct operator_id (HCS-10 envelope).
+  // 5. Create HCS10 clients — each agent must use its own account ID + private key.
   function agentKey(agent: any): string | undefined {
     if (agent.encryptedPrivateKey) return decryptPrivateKey(agent.encryptedPrivateKey);
-    return undefined; // fallback to platform operator key
+    return undefined;
   }
   const dispatcherClient = createHCS10Client(dispatcherAgent.accountId ?? undefined, agentKey(dispatcherAgent));
   const summarizerClient = createHCS10Client(summarizerAgent.accountId ?? undefined, agentKey(summarizerAgent));

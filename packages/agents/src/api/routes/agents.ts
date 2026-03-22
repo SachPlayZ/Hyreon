@@ -13,7 +13,7 @@ import {
   verifyAccountExists,
 } from '../../hcs10/connections';
 import { lookupEvmAddress } from '../../hedera/mirror';
-import { encryptPrivateKey } from '../../hedera/keyEncryption';
+import { encryptPrivateKey, decryptPrivateKey } from '../../hedera/keyEncryption';
 
 const prisma = getPrismaClient();
 const router = Router();
@@ -254,7 +254,8 @@ router.post('/register', requireAuth, async (req, res) => {
       if (dispatcherAccountId) {
         try {
           const dispatcher = await prisma.agent.findFirst({ where: { type: 'DISPATCHER' } });
-          const dispatcherClient = createHCS10Client(dispatcher?.accountId ?? undefined);
+          const dispKey = dispatcher?.encryptedPrivateKey ? decryptPrivateKey(dispatcher.encryptedPrivateKey) : undefined;
+          const dispatcherClient = createHCS10Client(dispatcher?.accountId ?? undefined, dispKey);
           await initiateHCS10Handshake(dispatcherClient, selfInboundTopicId!);
           connectionStatus = 'pending_handshake';
           console.log(`[agents/register] HCS-10 handshake initiated with ${agentName}`);
@@ -467,52 +468,61 @@ router.post('/:id/complete-connection', async (req, res) => {
 
 // GET /api/agents/:agentId/tasks/pending — external HCS-10 agents fetch assigned tasks
 router.get('/:agentId/tasks/pending', async (req, res) => {
+  const { agentId } = req.params;
   try {
     // Verify API key
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
+      console.warn(`[agents/poll] ${agentId} — missing Bearer token`);
       res.status(401).json({ error: 'API key required' });
       return;
     }
     const token = authHeader.slice(7);
-    const valid = await verifyAgentApiKey(req.params.agentId, token);
+    const valid = await verifyAgentApiKey(agentId, token);
     if (!valid) {
+      console.warn(`[agents/poll] ${agentId} — invalid API key`);
       res.status(403).json({ error: 'Invalid API key' });
       return;
     }
 
     const tasks = await prisma.task.findMany({
       where: {
-        assignedWorkerId: req.params.agentId,
+        assignedWorkerId: agentId,
         status: { in: ['IN_PROGRESS', 'ESCROW_CREATED', 'GATHERING_INPUTS'] },
       },
       orderBy: { createdAt: 'asc' },
     });
 
+    console.log(`[agents/poll] ${agentId} — ${tasks.length} pending task(s)`);
     res.json({ tasks });
   } catch (err: any) {
+    console.error(`[agents/poll] ${agentId} — error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
 // POST /api/agents/:agentId/tasks/:taskId/result — external HCS-10 agents submit results
 router.post('/:agentId/tasks/:taskId/result', async (req, res) => {
+  const { agentId, taskId } = req.params;
   try {
     // Verify API key
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
+      console.warn(`[agents/result] ${agentId} task ${taskId} — missing Bearer token`);
       res.status(401).json({ error: 'API key required' });
       return;
     }
     const token = authHeader.slice(7);
-    const valid = await verifyAgentApiKey(req.params.agentId, token);
+    const valid = await verifyAgentApiKey(agentId, token);
     if (!valid) {
+      console.warn(`[agents/result] ${agentId} task ${taskId} — invalid API key`);
       res.status(403).json({ error: 'Invalid API key' });
       return;
     }
 
     const { resultText } = req.body as { resultText: string };
     if (!resultText) {
+      console.warn(`[agents/result] ${agentId} task ${taskId} — missing resultText`);
       res.status(400).json({ error: 'resultText is required' });
       return;
     }
@@ -520,22 +530,25 @@ router.post('/:agentId/tasks/:taskId/result', async (req, res) => {
     // Verify the task belongs to this agent
     const task = await prisma.task.findFirst({
       where: {
-        id: req.params.taskId,
-        assignedWorkerId: req.params.agentId,
+        id: taskId,
+        assignedWorkerId: agentId,
       },
     });
     if (!task) {
+      console.warn(`[agents/result] ${agentId} task ${taskId} — not found or not assigned`);
       res.status(404).json({ error: 'Task not found or not assigned to this agent' });
       return;
     }
 
     const updated = await prisma.task.update({
-      where: { id: req.params.taskId },
+      where: { id: taskId },
       data: { resultText },
     });
 
+    console.log(`[agents/result] ${agentId} task ${taskId} — result submitted (${resultText.length} chars)`);
     res.json({ task: updated });
   } catch (err: any) {
+    console.error(`[agents/result] ${agentId} task ${taskId} — error:`, err.message);
     res.status(500).json({ error: err.message });
   }
 });

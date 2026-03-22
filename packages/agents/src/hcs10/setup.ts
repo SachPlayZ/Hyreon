@@ -7,20 +7,28 @@ import {
 import { PrivateKey } from '@hashgraph/sdk';
 import { config } from '../config';
 
-// HCS-10 SDK expects raw 32-byte hex key, not DER-encoded
-function toRawHex(keyDerOrRaw: string): string {
+/**
+ * Ensure the key is in DER-encoded hex format so the SDK can detect
+ * the correct key type (ECDSA vs ED25519) instead of guessing wrong.
+ */
+function toDerHex(key: string): string {
+  // If it's already DER-encoded, return as-is
   try {
-    return PrivateKey.fromStringDer(keyDerOrRaw).toStringRaw();
-  } catch {
-    return keyDerOrRaw; // already raw
-  }
+    PrivateKey.fromStringDer(key);
+    return key;
+  } catch { /* not DER yet */ }
+  // Raw hex — try ECDSA first, then ED25519, and return DER form
+  try {
+    return PrivateKey.fromStringECDSA(key).toStringDer();
+  } catch { /* not ECDSA */ }
+  return PrivateKey.fromStringED25519(key).toStringDer();
 }
 
 export function createHCS10Client(operatorId?: string, operatorKey?: string): HCS10Client {
   return new HCS10Client({
     network: 'testnet',
     operatorId: operatorId ?? config.hedera.operatorId,
-    operatorPrivateKey: toRawHex(operatorKey ?? config.hedera.operatorKey),
+    operatorPrivateKey: toDerHex(operatorKey ?? config.hedera.operatorKey),
     logLevel: 'warn',
   });
 }
