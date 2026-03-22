@@ -456,9 +456,22 @@ export class DispatcherOrchestrator {
                   }
                   if (attempt < 2) await new Promise((r) => setTimeout(r, 1000));
                 }
+                let finalResult = resultText ?? msg.data.result ?? '';
+                // Rephrase the raw result into friendly markdown for the user
+                if (finalResult && worker.isThirdParty) {
+                  try {
+                    finalResult = await formatResponseForUser(
+                      finalResult,
+                      worker.exampleResponseBody ?? null,
+                      worker.name
+                    );
+                  } catch (err) {
+                    console.warn('[Orchestrator] Could not rephrase HCS-10 result:', err);
+                  }
+                }
                 resultMessage = {
                   ...msg.data,
-                  result: resultText ?? msg.data.result ?? '',
+                  result: finalResult,
                 };
                 break;
               }

@@ -1,30 +1,13 @@
 import { ExternalLink } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
 
 interface Props {
   role: 'user' | 'dispatcher' | 'system' | string;
   content: string;
   verification?: any;
   timestamp?: string;
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function renderMarkdown(text: string): string {
-  return escapeHtml(text)
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(
-      /\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline underline-offset-2 hover:opacity-80">$1</a>'
-    )
-    .replace(/\n/g, '<br/>');
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -57,15 +40,31 @@ export function MessageBubble({ role, content, verification, timestamp }: Props)
         )}
         <div
           className={cn(
-            'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+            'rounded-2xl px-4 py-2.5 text-sm leading-relaxed prose prose-sm prose-invert max-w-none',
+            'prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5',
+            'prose-a:text-primary prose-a:underline prose-a:underline-offset-2 hover:prose-a:opacity-80',
+            'prose-strong:text-foreground prose-headings:text-foreground',
+            'prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs',
+            'prose-pre:bg-card/80 prose-pre:border prose-pre:border-border/40 prose-pre:rounded-lg',
             isUser
-              ? 'bg-primary text-primary-foreground rounded-tr-sm'
+              ? 'bg-primary text-primary-foreground rounded-tr-sm prose-invert prose-a:text-primary-foreground'
               : isSystem
               ? 'bg-destructive/10 text-destructive border border-destructive/20 rounded-tl-sm'
               : 'bg-card border border-border/60 text-foreground rounded-tl-sm'
           )}
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-        />
+        >
+          <ReactMarkdown
+            components={{
+              a: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
 
         {verification && (verification.escrowTxId || verification.releaseTxId) && (
           <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-400 space-y-1.5 w-full">

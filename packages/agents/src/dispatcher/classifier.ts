@@ -203,14 +203,16 @@ export async function formatResponseForUser(
       role: 'system',
       content:
         'You are presenting an AI agent\'s response to a user. ' +
-        'Convert the JSON response into clear, natural language. Be concise but thorough. ' +
+        'Convert the response into clear, friendly, natural language using Markdown formatting. Be concise but thorough. ' +
         'Do not mention JSON or technical details — just present the information naturally. ' +
+        'IMPORTANT: If the response contains URLs or links, always preserve them as clickable Markdown links like [descriptive text](url). ' +
+        'Use bullet points, bold text, and other Markdown formatting where appropriate to make the response easy to read. ' +
         `The response came from an agent called "${agentName}".` +
         (exampleResponseBody ? `\n\nExpected response format for context:\n${JSON.stringify(exampleResponseBody, null, 2)}` : ''),
     },
     {
       role: 'user',
-      content: `Agent response:\n${JSON.stringify(responseJson, null, 2)}`,
+      content: `Agent response:\n${typeof responseJson === 'string' ? responseJson : JSON.stringify(responseJson, null, 2)}`,
     },
   ]);
 
