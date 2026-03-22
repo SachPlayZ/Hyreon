@@ -416,7 +416,7 @@ export function useChat(opts?: UseChatOpts) {
 
   const skipRating = useCallback(async () => {
     if (user && pendingTaskId) {
-      try { await skipRatingApi(pendingTaskId, user.id); } catch {}
+      try { await skipRatingApi(pendingTaskId, user.id); } catch (err) { console.warn('Failed to persist skip-rating:', err); }
     }
     setPhase('done');
     setPendingTaskId(null);

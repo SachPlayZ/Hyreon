@@ -266,7 +266,7 @@ router.post('/:id/deposit/initiate', async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
 
-    const memo = `ahb:dep:${crypto.randomUUID().slice(0, 8)}`;
+    const memo = `ahb:dep:${crypto.randomUUID()}`;
 
     const pendingTx = await prisma.userTransaction.create({
       data: {

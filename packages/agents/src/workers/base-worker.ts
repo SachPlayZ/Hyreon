@@ -84,6 +84,16 @@ export abstract class BaseWorker {
     const start = Date.now();
     try {
       // Fetch full task from DB — keeps HCS messages small
+      // Atomically claim the task — only process if still IN_PROGRESS to prevent double-execution
+      const claimed = await prisma.task.updateMany({
+        where: { id: taskId, status: 'IN_PROGRESS' },
+        data: { status: 'IN_PROGRESS' }, // no-op update; we just need the count check
+      });
+      if (claimed.count === 0) {
+        console.log(`[${this.name}] Task ${taskId} already processed or not in progress, skipping`);
+        return;
+      }
+
       const task = await prisma.task.findUnique({ where: { id: taskId } });
       if (!task) throw new Error(`Task ${taskId} not found in database`);
 

@@ -44,6 +44,7 @@ export function InlineRating({ agentName, onSubmit, onSkip }: Props) {
               onMouseEnter={() => setHovered(s)}
               onMouseLeave={() => setHovered(0)}
               className="p-0.5 transition-transform hover:scale-110"
+              aria-label={`Rate ${s} out of 5 stars`}
             >
               <Star
                 size={18}
@@ -59,6 +60,7 @@ export function InlineRating({ agentName, onSubmit, onSkip }: Props) {
         <button
           onClick={onSkip}
           className="p-0.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+          aria-label="Skip rating"
         >
           <X size={14} />
         </button>
