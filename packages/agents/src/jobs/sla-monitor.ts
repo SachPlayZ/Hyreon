@@ -20,40 +20,43 @@ export function startSlaMonitor(): NodeJS.Timeout {
         console.log(`[SLA Monitor] Task ${task.id} missed SLA deadline, triggering refund`);
 
         try {
-          const refundAmount = (task.escrowAmountHbar ?? 0) * (1 + 0.05); // gross + fee
+          const refundAmount = task.escrowAmountHbar ?? 0; // already includes fee
 
-          await prisma.$transaction([
-            prisma.task.update({
+          // Atomically check status is still IN_PROGRESS to prevent double-refund
+          await prisma.$transaction(async (tx) => {
+            const fresh = await tx.task.findUnique({ where: { id: task.id } });
+            if (!fresh || fresh.status !== 'IN_PROGRESS') return; // already processed
+
+            await tx.task.update({
               where: { id: task.id },
               data: { slaMet: false, status: 'REFUNDED' },
-            }),
-            // Mark platform fee as refunded — fee never retained on SLA breach
-            prisma.transaction.updateMany({
+            });
+
+            if (task.userId) {
+              await tx.user.update({
+                where: { id: task.userId },
+                data: {
+                  hbarBalance: { increment: refundAmount },
+                  hbarSpent: { decrement: refundAmount },
+                },
+              });
+              await tx.transaction.create({
+                data: {
+                  taskId: task.id,
+                  type: 'REFUND',
+                  amountHbar: refundAmount,
+                  fromAccount: config.hedera.operatorId,
+                  toAccount: task.user?.hederaAccountId ?? task.userId,
+                  status: 'completed',
+                },
+              });
+            }
+
+            await tx.transaction.updateMany({
               where: { taskId: task.id, type: 'PLATFORM_FEE' },
               data: { status: 'refunded' },
-            }),
-            ...(task.userId
-              ? [
-                  prisma.user.update({
-                    where: { id: task.userId },
-                    data: {
-                      hbarBalance: { increment: refundAmount },
-                      hbarSpent: { decrement: refundAmount },
-                    },
-                  }),
-                  prisma.transaction.create({
-                    data: {
-                      taskId: task.id,
-                      type: 'REFUND',
-                      amountHbar: refundAmount,
-                      fromAccount: config.hedera.operatorId,
-                      toAccount: task.user?.hederaAccountId ?? task.userId,
-                      status: 'completed',
-                    },
-                  }),
-                ]
-              : []),
-          ]);
+            });
+          });
 
           // Log escrow refund to HCS
           if (task.escrowAmountHbar && config.topics.escrow) {

@@ -384,14 +384,6 @@ router.post('/:id/deposit/confirm-evm', async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!user) { res.status(404).json({ error: 'User not found' }); return; }
 
-    const alreadyProcessed = await prisma.userTransaction.findFirst({
-      where: { hederaTxId: txHash, status: 'confirmed' },
-    });
-    if (alreadyProcessed) {
-      res.status(400).json({ error: 'Transaction already processed' });
-      return;
-    }
-
     const platformEvmAddress = getPlatformEvmAddress();
 
     // Verify directly via JSON-RPC relay — no polling needed, same source as MetaMask
@@ -402,25 +394,40 @@ router.post('/:id/deposit/confirm-evm', async (req, res) => {
       return;
     }
 
-    const [updatedUser] = await prisma.$transaction([
-      prisma.user.update({
-        where: { id: user.id },
-        data: {
-          hbarBalance: { increment: result.actualAmountHbar },
-          hbarDeposited: { increment: result.actualAmountHbar },
-        },
-      }),
-      prisma.userTransaction.create({
-        data: {
-          userId: user.id,
-          type: 'deposit',
-          amountHbar: result.actualAmountHbar,
-          hederaTxId: txHash,
-          status: 'confirmed',
-          memo: 'evm',
-        },
-      }),
-    ]);
+    // Atomic: duplicate check + credit in single transaction to prevent double-credit
+    let updatedUser;
+    try {
+      updatedUser = await prisma.$transaction(async (tx) => {
+        const existing = await tx.userTransaction.findFirst({
+          where: { hederaTxId: txHash, status: 'confirmed' },
+        });
+        if (existing) throw new Error('ALREADY_PROCESSED');
+
+        await tx.userTransaction.create({
+          data: {
+            userId: user.id,
+            type: 'deposit',
+            amountHbar: result.actualAmountHbar,
+            hederaTxId: txHash,
+            status: 'confirmed',
+            memo: 'evm',
+          },
+        });
+        return tx.user.update({
+          where: { id: user.id },
+          data: {
+            hbarBalance: { increment: result.actualAmountHbar },
+            hbarDeposited: { increment: result.actualAmountHbar },
+          },
+        });
+      });
+    } catch (err: any) {
+      if (err.message === 'ALREADY_PROCESSED') {
+        res.status(400).json({ error: 'Transaction already processed' });
+        return;
+      }
+      throw err;
+    }
 
     res.json({
       user: updatedUser,
@@ -516,17 +523,21 @@ router.post('/:id/withdraw', async (req, res) => {
       return;
     }
 
-    const user = await prisma.user.findUnique({ where: { id: req.params.id } });
-    if (!user) { res.status(404).json({ error: 'User not found' }); return; }
-    if (user.hbarBalance < amount) {
-      res.status(400).json({ error: `Insufficient platform balance. Available: ${user.hbarBalance.toFixed(2)} ℏ` });
-      return;
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { hbarBalance: { decrement: amount } },
+    // Atomic balance check + deduction to prevent concurrent withdrawal races
+    const user = await prisma.$transaction(async (tx) => {
+      const u = await tx.user.findUnique({ where: { id: req.params.id } });
+      if (!u) throw new Error('NOT_FOUND');
+      if (u.hbarBalance < amount) throw new Error('INSUFFICIENT');
+      return tx.user.update({
+        where: { id: u.id },
+        data: { hbarBalance: { decrement: amount } },
+      });
+    }).catch((err) => {
+      if (err.message === 'NOT_FOUND') { res.status(404).json({ error: 'User not found' }); return null; }
+      if (err.message === 'INSUFFICIENT') { res.status(400).json({ error: 'Insufficient platform balance' }); return null; }
+      throw err;
     });
+    if (!user) return;
 
     let txId: string;
     try {
@@ -541,6 +552,7 @@ router.post('/:id/withdraw', async (req, res) => {
       await response.getReceipt(client);
       txId = response.transactionId.toString();
     } catch (txErr: any) {
+      // On-chain tx failed — restore balance
       await prisma.user.update({
         where: { id: user.id },
         data: { hbarBalance: { increment: amount } },

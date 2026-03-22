@@ -35,7 +35,15 @@ export function ConversationSidebar({ activeConversationId, onSelect, onNewChat 
   const { data, isLoading } = useSWR(
     user ? `convs-${user.id}` : null,
     () => getTasks({ userId: user!.id }),
-    { refreshInterval: 5000 }
+    {
+      refreshInterval: (latestData: any) => {
+        const tasks: any[] = latestData?.tasks ?? [];
+        const allTerminal = tasks.length > 0 && tasks.every((t: any) =>
+          ['COMPLETED', 'ESCROW_RELEASED', 'REFUNDED', 'FAILED'].includes(t.status)
+        );
+        return allTerminal ? 0 : 5000;
+      },
+    }
   );
 
   const conversations: any[] = data?.tasks ?? [];

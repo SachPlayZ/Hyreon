@@ -134,6 +134,10 @@ export class DispatcherOrchestrator {
     // 4. Merge: third-party matches first (they're relevance-sorted), then platform agents
     const agents = [...thirdPartyMatches, ...platformMatches];
 
+    if (agents.length === 0) {
+      throw new Error('No agents are currently available that match your request. Please try rephrasing or check back later.');
+    }
+
     const task = await prisma.task.create({
       data: {
         userMessage,
@@ -254,6 +258,16 @@ export class DispatcherOrchestrator {
         );
       }
 
+      // Validate HCS-10 connection exists before committing funds
+      if (!(worker.isThirdParty && worker.thirdPartyProtocol === 'API' && worker.apiUrl)) {
+        const connection = await prisma.connection.findFirst({
+          where: { workerAccountId: worker.accountId },
+        });
+        if (!connection) {
+          throw new Error(`No connection established with agent ${worker.name}. The agent may still be setting up.`);
+        }
+      }
+
       // Step 1: Classify
       await prisma.task.update({ where: { id: taskId }, data: { status: 'CLASSIFYING' } });
       addStep('Classifying', 'completed');
@@ -267,27 +281,30 @@ export class DispatcherOrchestrator {
 
       addStep('Hiring Worker', 'completed');
 
-      // Step 3: Deduct balance
+      // Step 3: Deduct balance (atomic — re-check balance inside transaction to prevent races)
       const platformFee = grossAmount * platformFeePercent;
       const netAmount = grossAmount - platformFee;
 
-      await prisma.$transaction([
-        prisma.user.update({
+      await prisma.$transaction(async (tx) => {
+        const freshUser = await tx.user.findUnique({ where: { id: userId } });
+        if (!freshUser || freshUser.hbarBalance < grossAmount) {
+          throw new Error(`Insufficient balance: need ${grossAmount.toFixed(2)} HBAR`);
+        }
+        await tx.user.update({
           where: { id: userId },
           data: { hbarBalance: { decrement: grossAmount }, hbarSpent: { increment: grossAmount } },
-        }),
-        // Record platform fee accrual — stays in operator account (treasury = operator)
-        prisma.transaction.create({
+        });
+        await tx.transaction.create({
           data: {
             taskId,
             type: 'PLATFORM_FEE',
             amountHbar: platformFee,
-            fromAccount: user.hederaAccountId,
+            fromAccount: freshUser.hederaAccountId,
             toAccount: config.hedera.operatorId,
             status: 'completed',
           },
-        }),
-      ]);
+        });
+      });
       await prisma.task.update({ where: { id: taskId }, data: { platformFeeHbar: platformFee } });
 
       // Step 4: Escrow on HCS
@@ -520,28 +537,34 @@ export class DispatcherOrchestrator {
       // Step 8: Pay worker — on-chain transfer of net amount (platform fee stays in operator account)
       addStep('Releasing Payment', 'active');
       let releaseTxId = '';
+      let paymentFailed = false;
       try {
         releaseTxId = await this.escrowManager.releaseEscrow(worker.accountId, escrow.netAmount, taskId);
       } catch (err) {
-        console.warn('[Orchestrator] Payment release failed:', err);
-        releaseTxId = 'offline';
+        console.error('[Orchestrator] Payment release failed — will retry:', err);
+        paymentFailed = true;
       }
 
       await prisma.task.update({
         where: { id: taskId },
-        data: { releaseTxId, status: 'ESCROW_RELEASED' },
-      });
-      await prisma.transaction.create({
         data: {
-          taskId,
-          type: 'ESCROW_RELEASE',
-          hederaTxId: releaseTxId !== 'offline' ? releaseTxId : undefined,
-          amountHbar: escrow.netAmount,
-          fromAccount: config.hedera.operatorId,
-          toAccount: worker.accountId,
-          status: 'completed',
+          releaseTxId: releaseTxId || null,
+          status: paymentFailed ? 'PAYMENT_FAILED' : 'ESCROW_RELEASED',
         },
       });
+      if (!paymentFailed) {
+        await prisma.transaction.create({
+          data: {
+            taskId,
+            type: 'ESCROW_RELEASE',
+            hederaTxId: releaseTxId,
+            amountHbar: escrow.netAmount,
+            fromAccount: config.hedera.operatorId,
+            toAccount: worker.accountId,
+            status: 'completed',
+          },
+        });
+      }
       addStep('Releasing Payment', 'completed', {
         txId: releaseTxId,
         hashScanUrl: releaseTxId !== 'offline' ? getHashScanTxUrl(releaseTxId) : undefined,

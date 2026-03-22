@@ -16,7 +16,11 @@ export function InlineRating({ agentName, onSubmit, onSkip }: Props) {
 
   const handleClick = async (s: number) => {
     setSubmitted(true);
-    await onSubmit(s);
+    try {
+      await onSubmit(s);
+    } catch {
+      setSubmitted(false);
+    }
   };
 
   if (submitted) return null;

@@ -18,10 +18,12 @@ export function startRatingWindowCloser(): NodeJS.Timeout {
         console.log(`[Rating Closer] Closing rating window for task ${task.id}`);
 
         try {
-          await prisma.task.update({
-            where: { id: task.id },
+          // Atomically check status is still RATING_WINDOW to avoid race with user submitting rating
+          const updated = await prisma.task.updateMany({
+            where: { id: task.id, status: 'RATING_WINDOW' },
             data: { status: 'COMPLETED' },
           });
+          if (updated.count === 0) continue; // already changed by rating submission
 
           if (task.assignedWorkerId) {
             await recomputeAndSaveReputation(
