@@ -488,7 +488,7 @@ router.get('/:agentId/tasks/pending', async (req, res) => {
     const tasks = await prisma.task.findMany({
       where: {
         assignedWorkerId: agentId,
-        status: { in: ['IN_PROGRESS', 'ESCROW_CREATED', 'GATHERING_INPUTS'] },
+        status: { in: ['IN_PROGRESS', 'ESCROW_CREATED'] },
       },
       orderBy: { createdAt: 'asc' },
     });
