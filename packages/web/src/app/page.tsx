@@ -229,7 +229,7 @@ function HeroSection({ loggedIn }: { loggedIn: boolean }) {
           <Link href={loggedIn ? '/chat' : '/login'}>
             <Button
               size="lg"
-              className="h-13 px-8 text-base bg-hyreon-purple text-white hover:bg-hyreon-purple/90 glow-purple font-semibold rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+              className="h-14 px-10 text-base bg-hyreon-purple text-white hover:bg-hyreon-purple/90 glow-purple font-semibold rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               {loggedIn ? 'Open Dashboard' : 'Hire an Agent'}
               <ArrowRight size={18} className="ml-2" />
@@ -239,7 +239,7 @@ function HeroSection({ loggedIn }: { loggedIn: boolean }) {
             <Button
               variant="outline"
               size="lg"
-              className="h-13 px-8 text-base rounded-xl border-border/60 hover:bg-accent/50 cursor-pointer transition-all duration-200"
+              className="h-14 px-10 text-base rounded-xl border-border/60 hover:bg-accent/50 cursor-pointer transition-all duration-200"
             >
               How Trust Works
               <ChevronRight size={16} className="ml-1" />
@@ -278,7 +278,7 @@ const CHAT_STEPS: ChatStep[] = [
 
 function ChatPreview() {
   const [visibleCount, setVisibleCount] = useState(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (visibleCount >= CHAT_STEPS.length) return;
@@ -287,9 +287,12 @@ function ChatPreview() {
     return () => clearTimeout(t);
   }, [visibleCount]);
 
-  // Auto-scroll to bottom when new messages appear
+  // Auto-scroll the chat container (not the page) when new messages appear
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
   }, [visibleCount]);
 
   return (
@@ -313,14 +316,13 @@ function ChatPreview() {
         </div>
 
         {/* Messages — fixed scrollable area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-3">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 md:p-5 space-y-3">
           {CHAT_STEPS.map((step, i) => (
             i < visibleCount && <ChatBubble key={i} step={step} />
           ))}
           {visibleCount < CHAT_STEPS.length && visibleCount > 0 && (
             <TypingIndicator />
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Input mock — pinned to bottom */}
