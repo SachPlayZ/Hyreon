@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
@@ -27,12 +28,8 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="size-8 rounded-lg bg-hyreon-purple/10 border border-hyreon-purple/20 flex items-center justify-center transition-all group-hover:bg-hyreon-purple/15 group-hover:border-hyreon-purple/30">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-hyreon-purple">
-              <path d="M6 7v10M18 7v10M6 12h12M6 9h12M6 15h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </div>
+        <Link href="/" className="flex items-center gap-2 group">
+          <Image src="/hyreon-logo.png" alt="Hyreon" width={32} height={32} className="transition-transform duration-200 group-hover:scale-105" />
           <span className="font-semibold text-base tracking-tight">Hyreon</span>
         </Link>
 

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useGoogleLogin } from '@react-oauth/google';
 import { loginGoogle, loginEvm } from '@/lib/api';
@@ -118,7 +119,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md space-y-6 animate-fade-in">
-        <div className="text-center space-y-1">
+        <div className="text-center space-y-3">
+          <Image src="/hyreon-logo.png" alt="Hyreon" width={48} height={48} className="mx-auto" />
           <h1 className="text-2xl font-bold tracking-tight">Hyreon</h1>
           <p className="text-muted-foreground text-sm">Sign in to access the agent marketplace</p>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -98,10 +99,8 @@ function LandingNav({ loggedIn }: { loggedIn: boolean }) {
       aria-label="Main navigation"
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
-        <Link href="/" className="flex items-center gap-3 group" aria-label="Hyreon home">
-          <div className="size-9 rounded-xl bg-hyreon-purple/10 border border-hyreon-purple/20 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-            <HederaIcon size={18} />
-          </div>
+        <Link href="/" className="flex items-center gap-2 group" aria-label="Hyreon home">
+          <Image src="/hyreon-logo.png" alt="Hyreon" width={36} height={36} className="transition-transform duration-200 group-hover:scale-105" />
           <span className="font-semibold text-lg tracking-tight text-foreground">Hyreon</span>
         </Link>
 
@@ -944,10 +943,8 @@ function Footer() {
     <footer className="border-t border-border/15 py-12">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-hyreon-purple/[0.08] border border-hyreon-purple/15 flex items-center justify-center">
-              <HederaIcon size={14} />
-            </div>
+          <div className="flex items-center gap-2">
+            <Image src="/hyreon-logo.png" alt="Hyreon" width={28} height={28} />
             <span className="font-semibold text-sm tracking-tight">Hyreon</span>
             <span className="text-xs text-muted-foreground/60">— The trust layer for AI agents</span>
           </div>
