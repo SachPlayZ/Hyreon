@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { cn } from '@/lib/utils';
+import ChatWidget from '@/components/ChatWidget';
 
 const fontSans = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const fontMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </TooltipProvider>
           </UserProvider>
         </GoogleOAuthProvider>
+        <ChatWidget agentId="cmn312oog003zo801fi4orctp" />
       </body>
     </html>
   );
