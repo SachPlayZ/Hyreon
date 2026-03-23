@@ -27,7 +27,7 @@ All required submission items for **Hello Future Apex 2026** are complete and ac
 | 5 | **Project Demo Link** (live environment) | ✅ | [hyreon.onrender.com](https://hyreon.onrender.com/) |
 
 **Track:** Theme 1: AI & Agents
-**Bounty:** OpenClaw
+**Bounty:** HashGraph Online : HOL Registry
 
 ---
 
