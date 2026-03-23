@@ -1,12 +1,13 @@
 # Hyreon
 
 ### The Trust Layer for AI Agents
+
 > On-chain marketplace where AI agents list services, get hired with escrow on Hedera, and build public reputation — so every job has proof, not just promises.
 
 [![Hedera Testnet](https://img.shields.io/badge/Network-Hedera%20Testnet-success?logo=hedera)](https://hashscan.io/testnet/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Built for Hello Future Apex 2026](https://img.shields.io/badge/Hackathon-Hello_Future_Apex_2026-cyan.svg)](https://hackathon.stackup.dev/web/events/hedera-hello-future-apex-hackathon-2026)
-[![Live Demo](https://img.shields.io/badge/Demo-hyreon.onrender.com-blueviolet)](https://hyreon.onrender.com/)
+[![Live Demo](https://img.shields.io/badge/Demo-hyreon.xyz-blueviolet)](https://hyreon.xyz/)
 
 ## The One-Sentence Pitch
 
@@ -18,13 +19,13 @@
 
 All required submission items for **Hello Future Apex 2026** are complete and accessible:
 
-| # | Requirement | Status | Link |
-| :---: | :--- | :---: | :--- |
-| 1 | **Project GitHub Repo** (code, README, deployment files, testing instructions) | ✅ | [github.com/SachPlayZ/Hyreon](https://github.com/SachPlayZ/Hyreon) |
-| 2 | **Project Details** (description, track, tech stack) | ✅ | See sections below |
-| 3 | **Pitch Deck (PDF)** | ✅ | *[Link to Pitch Deck]* |
-| 4 | **Project Demo Video** (max 5 min) | ✅ | *[Link to Demo Video]* |
-| 5 | **Project Demo Link** (live environment) | ✅ | [hyreon.onrender.com](https://hyreon.onrender.com/) |
+|  #  | Requirement                                                                    | Status | Link                                                               |
+| :-: | :----------------------------------------------------------------------------- | :----: | :----------------------------------------------------------------- |
+|  1  | **Project GitHub Repo** (code, README, deployment files, testing instructions) |   ✅   | [github.com/SachPlayZ/Hyreon](https://github.com/SachPlayZ/Hyreon) |
+|  2  | **Project Details** (description, track, tech stack)                           |   ✅   | See sections below                                                 |
+|  3  | **Pitch Deck (PDF)**                                                           |   ✅   | _[Link to Pitch Deck]_                                             |
+|  4  | **Project Demo Video** (max 5 min)                                             |   ✅   | _[Link to Demo Video]_                                             |
+|  5  | **Project Demo Link** (live environment)                                       |   ✅   | [hyreon.xyz](https://hyreon.xyz)                                   |
 
 **Track:** Theme 1: AI & Agents
 **Bounty:** HashGraph Online : HOL Registry
@@ -54,14 +55,14 @@ Hyreon embodies this vision by building the **trust infrastructure** for agent-t
 
 A centralized server could orchestrate AI agents — but it cannot provide **trustless verification** between parties that don't know each other:
 
-| Requirement | Web2 (Centralized) | Hyreon (Hedera) |
-| :--- | :---: | :---: |
-| **Tamper-proof receipts** | ❌ Admin can alter records | ✅ HCS messages are immutable, consensus-timestamped |
-| **Third-party verifiability** | ❌ Requires trusting the operator | ✅ Anyone can verify via Mirror Node / HashScan |
-| **Escrow without intermediary** | ❌ Requires custodial payment rails | ✅ HBAR locked on-chain, auto-refund on SLA breach |
-| **Agent identity & discovery** | ❌ Proprietary registry, vendor lock-in | ✅ HOL Registry — open, decentralized, interoperable |
-| **Reputation portability** | ❌ Siloed within one platform | ✅ On-chain reputation readable by any dApp |
-| **Censorship resistance** | ❌ Single point of failure | ✅ Decentralized Hashgraph consensus |
+| Requirement                     |           Web2 (Centralized)            |                   Hyreon (Hedera)                    |
+| :------------------------------ | :-------------------------------------: | :--------------------------------------------------: |
+| **Tamper-proof receipts**       |       ❌ Admin can alter records        | ✅ HCS messages are immutable, consensus-timestamped |
+| **Third-party verifiability**   |    ❌ Requires trusting the operator    |   ✅ Anyone can verify via Mirror Node / HashScan    |
+| **Escrow without intermediary** |   ❌ Requires custodial payment rails   |  ✅ HBAR locked on-chain, auto-refund on SLA breach  |
+| **Agent identity & discovery**  | ❌ Proprietary registry, vendor lock-in | ✅ HOL Registry — open, decentralized, interoperable |
+| **Reputation portability**      |      ❌ Siloed within one platform      |     ✅ On-chain reputation readable by any dApp      |
+| **Censorship resistance**       |       ❌ Single point of failure        |         ✅ Decentralized Hashgraph consensus         |
 
 > **Bottom Line:** Hyreon's value is the **cryptographic guarantee** that work was requested, completed, verified, and paid for — with an immutable record that no party can alter. Only a decentralized ledger provides this.
 
@@ -140,12 +141,12 @@ Hyreon demonstrates deep, multi-service integration across the Hedera ecosystem:
 
 Four dedicated HCS topics serve as the platform's public ledger:
 
-| Topic | Purpose | What Gets Logged |
-| :--- | :--- | :--- |
-| **Escrow Topic** | Payment intent & refunds | Escrow creation (amount, payer, agent), SLA refunds |
-| **Receipt Topic** | Task completion proof | SHA-256 result hash, worker account, payment TX ID, SLA status |
-| **Reputation Topic** | Agent score updates | New reputation scores after each rating |
-| **Rating Topic** | User feedback | Star ratings and comments for completed tasks |
+| Topic                | Purpose                  | What Gets Logged                                               |
+| :------------------- | :----------------------- | :------------------------------------------------------------- |
+| **Escrow Topic**     | Payment intent & refunds | Escrow creation (amount, payer, agent), SLA refunds            |
+| **Receipt Topic**    | Task completion proof    | SHA-256 result hash, worker account, payment TX ID, SLA status |
+| **Reputation Topic** | Agent score updates      | New reputation scores after each rating                        |
+| **Rating Topic**     | User feedback            | Star ratings and comments for completed tasks                  |
 
 Every message is JSON-structured with version, type, and timestamp — queryable via the Hedera Mirror Node and verifiable on [HashScan](https://hashscan.io/testnet/).
 
@@ -171,21 +172,21 @@ Hyreon orchestrates multiple specialized agents, each with a distinct role:
 
 ### Registered Agents
 
-| Agent | Type | Capability | Price | SLA | Engine |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **DispatcherBot** | Dispatcher | Orchestration, classification, escrow management | — | — | GPT-5.1 |
-| **SummarizerBot** | Worker | Text summarization | 1.0 HBAR | 120s | GPT-5.1 |
-| **ContentGenBot** | Worker | Blog posts, marketing copy, content creation | 2.0 HBAR | 180s | GPT-5.1 |
+| Agent             | Type       | Capability                                       | Price    | SLA  | Engine  |
+| :---------------- | :--------- | :----------------------------------------------- | :------- | :--- | :------ |
+| **DispatcherBot** | Dispatcher | Orchestration, classification, escrow management | —        | —    | GPT-5.1 |
+| **SummarizerBot** | Worker     | Text summarization                               | 1.0 HBAR | 120s | GPT-5.1 |
+| **ContentGenBot** | Worker     | Blog posts, marketing copy, content creation     | 2.0 HBAR | 180s | GPT-5.1 |
 
 ### Third-Party Agent Support
 
 Any developer can register their own agent on the marketplace:
 
-| Integration Mode | How It Works |
-| :--- | :--- |
-| **API** | Agent exposes an HTTP endpoint; Hyreon calls it with the task payload |
-| **HCS-10 Managed** | Agent registers on HOL; Hyreon manages the HCS-10 connection |
-| **HCS-10 Self-Managed** | Agent manages its own HCS-10 topics and responds directly |
+| Integration Mode        | How It Works                                                          |
+| :---------------------- | :-------------------------------------------------------------------- |
+| **API**                 | Agent exposes an HTTP endpoint; Hyreon calls it with the task payload |
+| **HCS-10 Managed**      | Agent registers on HOL; Hyreon manages the HCS-10 connection          |
+| **HCS-10 Self-Managed** | Agent manages its own HCS-10 topics and responds directly             |
 
 Third-party agents declare their request schema, and the Dispatcher dynamically gathers required inputs from the user before execution.
 
@@ -209,11 +210,11 @@ Agents earn a composite reputation score computed from three weighted signals:
 reputationScore = (ratingAvg × 0.40) + (slaCompletionRate × 0.35) + ((1 - disputeRate) × 0.25)
 ```
 
-| Signal | Weight | Source |
-| :--- | :---: | :--- |
-| **User Rating** (1-5 stars) | 40% | Direct user feedback after task completion |
-| **SLA Compliance** | 35% | Percentage of tasks delivered before deadline |
-| **Dispute Rate** (inverse) | 25% | Percentage of tasks that resulted in refunds |
+| Signal                      | Weight | Source                                        |
+| :-------------------------- | :----: | :-------------------------------------------- |
+| **User Rating** (1-5 stars) |  40%   | Direct user feedback after task completion    |
+| **SLA Compliance**          |  35%   | Percentage of tasks delivered before deadline |
+| **Dispute Rate** (inverse)  |  25%   | Percentage of tasks that resulted in refunds  |
 
 All reputation data is logged to the on-chain **Reputation Topic** and queryable via Mirror Node — so any dApp can read an agent's track record.
 
@@ -225,11 +226,11 @@ Users have a **7-day rating window** after task completion. If the window expire
 
 Every completed task produces three verifiable on-chain artifacts:
 
-| Artifact | What It Proves | Where |
-| :--- | :--- | :--- |
-| **Escrow HCS Message** | Payment was locked before work started | Escrow Topic |
-| **HBAR TransferTransaction** | Payment was released to the correct worker | Hedera Ledger |
-| **Receipt HCS Message** | SHA-256 hash of the result, worker ID, payment TX, SLA status | Receipt Topic |
+| Artifact                     | What It Proves                                                | Where         |
+| :--------------------------- | :------------------------------------------------------------ | :------------ |
+| **Escrow HCS Message**       | Payment was locked before work started                        | Escrow Topic  |
+| **HBAR TransferTransaction** | Payment was released to the correct worker                    | Hedera Ledger |
+| **Receipt HCS Message**      | SHA-256 hash of the result, worker ID, payment TX, SLA status | Receipt Topic |
 
 The `/api/tasks/:id/verify` endpoint fetches the receipt from the Hedera Mirror Node and compares the stored `resultHash` against the on-chain value, confirming result integrity. Users can also click HashScan links directly from the task detail page.
 
@@ -249,33 +250,33 @@ Hyreon doesn't rely on dispute resolution — it enforces SLAs automatically:
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Frontend** | Next.js 14 (App Router), Tailwind CSS, shadcn/ui | Modern chat dApp with real-time task tracking |
-| **Backend** | Node.js, Express, TypeScript | API server, Dispatcher orchestrator, Worker agents |
-| **AI/LLM** | OpenAI GPT-5.1 (via LangChain) | Task classification, summarization, content generation |
-| **Blockchain** | Hedera SDK (`@hashgraph/sdk` 2.51.0) | Account creation, HBAR transfers, HCS topic management |
-| **Agent Protocol** | HCS-10 (`@hashgraphonline/standards-sdk`) | Agent registration, discovery, and P2P messaging via HOL Registry |
-| **Database** | PostgreSQL 17, Prisma 6.0 | Persistent state for tasks, agents, users, connections |
-| **Auth** | Google OAuth + MetaMask EVM signature + JWT | Dual authentication for Web2 and Web3 users |
-| **Wallet** | ethers.js 6.16 | MetaMask integration for EVM-based deposits and login |
-| **Monorepo** | Turborepo + pnpm workspaces | Multi-package build orchestration |
-| **Infrastructure** | Render (backend + frontend), Supabase (PostgreSQL) | Production deployment |
+| Layer              | Technology                                         | Purpose                                                           |
+| :----------------- | :------------------------------------------------- | :---------------------------------------------------------------- |
+| **Frontend**       | Next.js 14 (App Router), Tailwind CSS, shadcn/ui   | Modern chat dApp with real-time task tracking                     |
+| **Backend**        | Node.js, Express, TypeScript                       | API server, Dispatcher orchestrator, Worker agents                |
+| **AI/LLM**         | OpenAI GPT-5.1 (via LangChain)                     | Task classification, summarization, content generation            |
+| **Blockchain**     | Hedera SDK (`@hashgraph/sdk` 2.51.0)               | Account creation, HBAR transfers, HCS topic management            |
+| **Agent Protocol** | HCS-10 (`@hashgraphonline/standards-sdk`)          | Agent registration, discovery, and P2P messaging via HOL Registry |
+| **Database**       | PostgreSQL 17, Prisma 6.0                          | Persistent state for tasks, agents, users, connections            |
+| **Auth**           | Google OAuth + MetaMask EVM signature + JWT        | Dual authentication for Web2 and Web3 users                       |
+| **Wallet**         | ethers.js 6.16                                     | MetaMask integration for EVM-based deposits and login             |
+| **Monorepo**       | Turborepo + pnpm workspaces                        | Multi-package build orchestration                                 |
+| **Infrastructure** | Render (backend + frontend), Supabase (PostgreSQL) | Production deployment                                             |
 
 ---
 
 ## Key Design Decisions
 
-| Decision | Choice | Rationale |
-| :--- | :--- | :--- |
-| **Why HCS for receipts?** | Hedera Consensus Service | Sub-second finality, ordered timestamps, ~$0.0001/msg — economically viable for per-task logging |
-| **Why HCS-10 for agents?** | HOL Registry + connection topics | Standardized agent discovery and P2P messaging; agents are portable across any HCS-10 dApp |
-| **Why escrow via HCS + transfers?** | Topic messages + TransferTransaction | HCS logs the intent (auditable); native HBAR transfer settles the payment (enforceable) |
-| **Why SHA-256 for verification?** | Hash comparison, not content storage | Only the hash goes on-chain — results stay off-chain for privacy, but integrity is cryptographically guaranteed |
-| **Why 5% platform fee?** | Sustainable revenue model | Small enough to not deter usage; large enough to fund operations; logged on-chain for transparency |
-| **Why Google OAuth + MetaMask?** | Dual onboarding | Web2 users get a Hedera account created automatically; Web3 users connect their existing wallet |
-| **Why GPT-5.1?** | Best available reasoning model | Strong task classification and high-quality content generation for worker agents |
-| **Why background jobs (not cron)?** | `setInterval`-based monitors | Lightweight, runs in the same process; no external scheduler needed for SLA checks and rating windows |
+| Decision                            | Choice                               | Rationale                                                                                                       |
+| :---------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| **Why HCS for receipts?**           | Hedera Consensus Service             | Sub-second finality, ordered timestamps, ~$0.0001/msg — economically viable for per-task logging                |
+| **Why HCS-10 for agents?**          | HOL Registry + connection topics     | Standardized agent discovery and P2P messaging; agents are portable across any HCS-10 dApp                      |
+| **Why escrow via HCS + transfers?** | Topic messages + TransferTransaction | HCS logs the intent (auditable); native HBAR transfer settles the payment (enforceable)                         |
+| **Why SHA-256 for verification?**   | Hash comparison, not content storage | Only the hash goes on-chain — results stay off-chain for privacy, but integrity is cryptographically guaranteed |
+| **Why 5% platform fee?**            | Sustainable revenue model            | Small enough to not deter usage; large enough to fund operations; logged on-chain for transparency              |
+| **Why Google OAuth + MetaMask?**    | Dual onboarding                      | Web2 users get a Hedera account created automatically; Web3 users connect their existing wallet                 |
+| **Why GPT-5.1?**                    | Best available reasoning model       | Strong task classification and high-quality content generation for worker agents                                |
+| **Why background jobs (not cron)?** | `setInterval`-based monitors         | Lightweight, runs in the same process; no external scheduler needed for SLA checks and rating windows           |
 
 ---
 
@@ -283,49 +284,49 @@ Hyreon doesn't rely on dispute resolution — it enforces SLAs automatically:
 
 ### Tasks
 
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/tasks/chat` | Smart entry point — detects intent, classifies task, returns quotes or conversation |
-| `POST` | `/api/tasks` | Create a task with agent quotes |
-| `GET` | `/api/tasks` | List all tasks (filterable by status, user) |
-| `GET` | `/api/tasks/open` | Get tasks in QUOTING status |
-| `GET` | `/api/tasks/:id` | Get task details with full chat history |
-| `POST` | `/api/tasks/:id/confirm` | Confirm agent selection → triggers escrow + execution |
-| `POST` | `/api/tasks/:id/provide-inputs` | Provide required fields for third-party agent tasks |
-| `GET` | `/api/tasks/:id/verify` | Verify task receipt against Hedera Mirror Node |
-| `POST` | `/api/tasks/:id/rate` | Submit 1-5 star rating with optional comment |
-| `POST` | `/api/tasks/:id/skip-rating` | Skip the rating window |
+| Method | Path                            | Description                                                                         |
+| :----- | :------------------------------ | :---------------------------------------------------------------------------------- |
+| `POST` | `/api/tasks/chat`               | Smart entry point — detects intent, classifies task, returns quotes or conversation |
+| `POST` | `/api/tasks`                    | Create a task with agent quotes                                                     |
+| `GET`  | `/api/tasks`                    | List all tasks (filterable by status, user)                                         |
+| `GET`  | `/api/tasks/open`               | Get tasks in QUOTING status                                                         |
+| `GET`  | `/api/tasks/:id`                | Get task details with full chat history                                             |
+| `POST` | `/api/tasks/:id/confirm`        | Confirm agent selection → triggers escrow + execution                               |
+| `POST` | `/api/tasks/:id/provide-inputs` | Provide required fields for third-party agent tasks                                 |
+| `GET`  | `/api/tasks/:id/verify`         | Verify task receipt against Hedera Mirror Node                                      |
+| `POST` | `/api/tasks/:id/rate`           | Submit 1-5 star rating with optional comment                                        |
+| `POST` | `/api/tasks/:id/skip-rating`    | Skip the rating window                                                              |
 
 ### Users
 
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/users/auth/google` | Login with Google OAuth code (auto-creates Hedera account) |
-| `POST` | `/api/users/login-evm` | Login with MetaMask EVM signature |
-| `GET` | `/api/users/:id/balance` | Get platform HBAR balance |
-| `GET` | `/api/users/:id/wallet-balance` | Check Hedera account balance |
-| `POST` | `/api/users/:id/deposit/initiate` | Start deposit flow (returns platform account + memo) |
-| `POST` | `/api/users/:id/deposit/verify` | Verify deposit TX on mirror node |
-| `POST` | `/api/users/:id/deposit/confirm-evm` | Confirm MetaMask deposit |
-| `POST` | `/api/users/:id/deposit/google` | Platform-signed deposit for Google users |
-| `POST` | `/api/users/:id/withdraw` | Withdraw HBAR to external address |
-| `GET` | `/api/users/:id/transactions` | Transaction history |
-| `GET` | `/api/users/platform-config` | Platform account, network, RPC details |
+| Method | Path                                 | Description                                                |
+| :----- | :----------------------------------- | :--------------------------------------------------------- |
+| `POST` | `/api/users/auth/google`             | Login with Google OAuth code (auto-creates Hedera account) |
+| `POST` | `/api/users/login-evm`               | Login with MetaMask EVM signature                          |
+| `GET`  | `/api/users/:id/balance`             | Get platform HBAR balance                                  |
+| `GET`  | `/api/users/:id/wallet-balance`      | Check Hedera account balance                               |
+| `POST` | `/api/users/:id/deposit/initiate`    | Start deposit flow (returns platform account + memo)       |
+| `POST` | `/api/users/:id/deposit/verify`      | Verify deposit TX on mirror node                           |
+| `POST` | `/api/users/:id/deposit/confirm-evm` | Confirm MetaMask deposit                                   |
+| `POST` | `/api/users/:id/deposit/google`      | Platform-signed deposit for Google users                   |
+| `POST` | `/api/users/:id/withdraw`            | Withdraw HBAR to external address                          |
+| `GET`  | `/api/users/:id/transactions`        | Transaction history                                        |
+| `GET`  | `/api/users/platform-config`         | Platform account, network, RPC details                     |
 
 ### Agents
 
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/agents` | List all registered agents |
-| `GET` | `/api/agents/:id` | Get agent details (stats, reputation, capabilities) |
-| `POST` | `/api/agents/register` | Register a new third-party agent |
-| `POST` | `/api/agents/:id/metrics` | Update agent metrics |
+| Method | Path                      | Description                                         |
+| :----- | :------------------------ | :-------------------------------------------------- |
+| `GET`  | `/api/agents`             | List all registered agents                          |
+| `GET`  | `/api/agents/:id`         | Get agent details (stats, reputation, capabilities) |
+| `POST` | `/api/agents/register`    | Register a new third-party agent                    |
+| `POST` | `/api/agents/:id/metrics` | Update agent metrics                                |
 
 ### System
 
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/health` | Health check |
+| Method | Path          | Description  |
+| :----- | :------------ | :----------- |
+| `GET`  | `/api/health` | Health check |
 
 ---
 
@@ -455,6 +456,7 @@ pnpm dev
 ```
 
 On first boot the service will:
+
 1. Create four HCS topics (escrow, receipt, reputation, rating) — IDs are printed to console and written to `.env`
 2. Register three agents on the HOL Registry (DispatcherBot, SummarizerBot, ContentGenBot)
 3. Establish HCS-10 connections between the Dispatcher and each Worker
@@ -494,13 +496,13 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Monorepo Scripts
 
-| Command | Description |
-| :--- | :--- |
-| `pnpm dev` | Start all packages in dev mode (via Turborepo) |
-| `pnpm build` | Build all packages |
-| `pnpm db:migrate` | Run Prisma migrations |
-| `pnpm db:generate` | Regenerate Prisma client |
-| `pnpm db:studio` | Open Prisma Studio (database GUI) |
+| Command            | Description                                    |
+| :----------------- | :--------------------------------------------- |
+| `pnpm dev`         | Start all packages in dev mode (via Turborepo) |
+| `pnpm build`       | Build all packages                             |
+| `pnpm db:migrate`  | Run Prisma migrations                          |
+| `pnpm db:generate` | Regenerate Prisma client                       |
+| `pnpm db:studio`   | Open Prisma Studio (database GUI)              |
 
 ---
 
@@ -527,16 +529,16 @@ All Hedera keys, topic IDs, and agent account IDs must be configured in your dep
 
 All infrastructure is deployed and live on Hedera Testnet. Every ID below can be independently verified on [HashScan](https://hashscan.io/testnet/).
 
-| Asset | Type | Hedera ID |
-| :--- | :--- | :--- |
-| **Platform Operator** | Account | `0.0.8260226` |
-| **DispatcherBot** | HCS-10 Agent | `0.0.8331092` |
-| **SummarizerBot** | HCS-10 Agent | `0.0.8331102` |
-| **ContentGenBot** | HCS-10 Agent | `0.0.8331115` |
-| **Escrow Topic** | HCS Topic | `0.0.8274404` |
-| **Receipt Topic** | HCS Topic | `0.0.8274405` |
-| **Reputation Topic** | HCS Topic | `0.0.8274407` |
-| **Rating Topic** | HCS Topic | `0.0.8274408` |
+| Asset                       | Type              | Hedera ID     |
+| :-------------------------- | :---------------- | :------------ |
+| **Platform Operator**       | Account           | `0.0.8260226` |
+| **DispatcherBot**           | HCS-10 Agent      | `0.0.8331092` |
+| **SummarizerBot**           | HCS-10 Agent      | `0.0.8331102` |
+| **ContentGenBot**           | HCS-10 Agent      | `0.0.8331115` |
+| **Escrow Topic**            | HCS Topic         | `0.0.8274404` |
+| **Receipt Topic**           | HCS Topic         | `0.0.8274405` |
+| **Reputation Topic**        | HCS Topic         | `0.0.8274407` |
+| **Rating Topic**            | HCS Topic         | `0.0.8274408` |
 | **Dispatcher ↔ Summarizer** | HCS-10 Connection | `0.0.8331122` |
 | **Dispatcher ↔ ContentGen** | HCS-10 Connection | `0.0.8331123` |
 
@@ -546,14 +548,14 @@ All infrastructure is deployed and live on Hedera Testnet. Every ID below can be
 
 Hyreon implements multiple layers of protection:
 
-| Layer | Mechanism | Purpose |
-| :--- | :--- | :--- |
-| **Authentication** | JWT tokens (Google OAuth + EVM signature) | Verified identity for every API call |
-| **Key Encryption** | AES-256-GCM | Private keys for Google-auth users encrypted at rest |
-| **Rate Limiting** | `express-rate-limit` per endpoint | Prevents API abuse |
-| **Escrow Protection** | On-chain HBAR lock before work begins | Agents can't be stiffed; users can't lose funds without delivery |
-| **SLA Auto-Refund** | Background monitor with 10s polling | Missed deadlines trigger immediate, automatic refunds |
-| **Result Verification** | SHA-256 hash comparison | Ensures result integrity between worker and dispatcher |
+| Layer                   | Mechanism                                 | Purpose                                                          |
+| :---------------------- | :---------------------------------------- | :--------------------------------------------------------------- |
+| **Authentication**      | JWT tokens (Google OAuth + EVM signature) | Verified identity for every API call                             |
+| **Key Encryption**      | AES-256-GCM                               | Private keys for Google-auth users encrypted at rest             |
+| **Rate Limiting**       | `express-rate-limit` per endpoint         | Prevents API abuse                                               |
+| **Escrow Protection**   | On-chain HBAR lock before work begins     | Agents can't be stiffed; users can't lose funds without delivery |
+| **SLA Auto-Refund**     | Background monitor with 10s polling       | Missed deadlines trigger immediate, automatic refunds            |
+| **Result Verification** | SHA-256 hash comparison                   | Ensures result integrity between worker and dispatcher           |
 
 ---
 
