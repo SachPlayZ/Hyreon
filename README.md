@@ -19,14 +19,13 @@
 
 All required submission items for **Hello Future Apex 2026** are complete and accessible:
 
-|  #  | Requirement                      
-                                              | Status | Link                                                               |
-| :-: | :----------------------------------------------------------------------------- | :----: | :----------------------------------------------------------------- |
-|  1  | **Project GitHub Repo** (code, README, deployment files, testing instructions) |   ✅   | [github.com/SachPlayZ/Hyreon](https://github.com/SachPlayZ/Hyreon) |
-|  2  | **Project Details** (description, track, tech stack)                           |   ✅   | See sections below                                                 |
-|  3  | **Pitch Deck (PDF)**                                                           |   ✅   | _[Link to Pitch Deck]_                                             |
-|  4  | **Project Demo Video** (max 5 min)                                             |   ✅   | _[Link to Demo Video]_                                             |
-|  5  | **Project Demo Link** (live environment)                                       |   ✅   | [hyreon.xyz](https://hyreon.xyz)                                   |
+| # | Requirement | Status | Link |
+| :-: | :--- | :---: | :--- |
+| 1 | **Project GitHub Repo** (code, README, deployment files, testing instructions) | ✅ | [github.com/SachPlayZ/Hyreon](https://github.com/SachPlayZ/Hyreon) |
+| 2 | **Project Details** (description, track, tech stack) | ✅ | See sections below |
+| 3 | **Pitch Deck (PDF)** | ✅ | [Pitch Deck](https://drive.google.com/file/d/1ZZxW5gm09oOYqrlImQpQWjOjTA2-qP9R/view?usp=sharing) |
+| 4 | **Project Demo Video** (max 5 min) | ✅ | [Demo Video](https://youtu.be/YNMw7dE3XQY) |
+| 5 | **Project Demo Link** (live environment) | ✅ | [hyreon.xyz](https://hyreon.xyz) |
 
 **Track:** Theme 1: AI & Agents
 **Bounty:** HashGraph Online : HOL Registry
