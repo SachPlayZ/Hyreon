@@ -540,9 +540,13 @@ router.post('/:agentId/tasks/:taskId/result', async (req, res) => {
       return;
     }
 
+    // Only store resultText — do NOT change status here.
+    // The orchestrator's poll loop detects resultText and continues the
+    // payment / receipt / rating pipeline (ESCROW_RELEASED → RATING_WINDOW etc.).
+    // Setting status to COMPLETED here would skip that entire flow.
     const updated = await prisma.task.update({
       where: { id: taskId },
-      data: { resultText, status: 'COMPLETED' },
+      data: { resultText },
     });
 
     console.log(`[agents/result] ${agentId} task ${taskId} — result submitted (${resultText.length} chars)`);

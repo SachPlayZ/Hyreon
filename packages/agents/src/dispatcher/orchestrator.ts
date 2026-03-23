@@ -429,7 +429,7 @@ export class DispatcherOrchestrator {
         addStep('Delegating Task', 'completed');
         addStep('Processing', 'active');
 
-        // Poll for result notification — worker saves result to DB, sends small status-only HCS msg
+        // Poll for result — check both HCS messages AND DB (agent may submit via API without HCS msg)
         const startTime = Date.now();
         const timeout = worker.slaSeconds * 1000;
         let lastSequence = 0;
@@ -437,6 +437,29 @@ export class DispatcherOrchestrator {
         while (Date.now() - startTime < timeout) {
           await new Promise((r) => setTimeout(r, 3000));
           try {
+            // Check DB first — agent may have submitted result via HTTP API
+            const dbTask = await prisma.task.findUnique({ where: { id: taskId } });
+            if (dbTask?.resultText) {
+              let finalResult = dbTask.resultText;
+              if (finalResult && worker.isThirdParty) {
+                try {
+                  finalResult = await formatResponseForUser(
+                    finalResult,
+                    worker.exampleResponseBody ?? null,
+                    worker.name
+                  );
+                } catch (err) {
+                  console.warn('[Orchestrator] Could not rephrase result:', err);
+                }
+              }
+              resultMessage = {
+                result: finalResult,
+                status: 'completed',
+              };
+              break;
+            }
+
+            // Also check HCS messages for backwards compatibility
             const messages = await getNewMessages(
               this.hcs10Client,
               connection.connectionTopicId,
