@@ -19,7 +19,8 @@
 
 All required submission items for **Hello Future Apex 2026** are complete and accessible:
 
-|  #  | Requirement                                                                    | Status | Link                                                               |
+|  #  | Requirement                      
+                                              | Status | Link                                                               |
 | :-: | :----------------------------------------------------------------------------- | :----: | :----------------------------------------------------------------- |
 |  1  | **Project GitHub Repo** (code, README, deployment files, testing instructions) |   ✅   | [github.com/SachPlayZ/Hyreon](https://github.com/SachPlayZ/Hyreon) |
 |  2  | **Project Details** (description, track, tech stack)                           |   ✅   | See sections below                                                 |

@@ -29,7 +29,7 @@ export function Header() {
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <Image src="/hyreon-logo.png" alt="Hyreon" width={32} height={32} className="transition-transform duration-200 group-hover:scale-105" />
+          <Image src="/hyreon-logo.png" alt="Hyreon" width={48} height={48} className="transition-transform duration-200 group-hover:scale-105" />
           <span className="font-semibold text-base tracking-tight">Hyreon</span>
         </Link>
 
